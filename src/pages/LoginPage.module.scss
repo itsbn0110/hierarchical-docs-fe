@@ -1,0 +1,33 @@
+// SCSS module for LoginPage
+.loginBg {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #e75480 0%, #a4508b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginFormContainer {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(80, 0, 80, 0.12);
+  padding: 40px 32px 32px 32px;
+  min-width: 340px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.tabsNav {
+  margin-bottom: 24px !important;
+}
+
+.btnPrimary {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.typographyDanger {
+  display: block;
+  margin-bottom: 8px;
+  text-align: center;
+}

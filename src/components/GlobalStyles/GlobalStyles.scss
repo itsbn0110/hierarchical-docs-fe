@@ -1,0 +1,37 @@
+/* Global styles, reset, font, ... */
+@use 'reset-css' as *;
+
+body {
+  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+}
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  box-sizing: border-box;
+  font-size: 62.5%;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: 1.6 rem;
+  line-height: 1.5 rem;
+  text-rendering: optimizeSpeed;
+  overflow-y: overlay;
+}
+
+// Thêm các style chung, override font cho Ant Design nếu muốn
+// .ant-typography,
+// .ant-btn,
+// .ant-input,Ư
+// .ant-form,
+// .ant-tabs {
+//   font-family: 'Roboto', 'Segoe UI', Arial, sans-serif !important;
+// }

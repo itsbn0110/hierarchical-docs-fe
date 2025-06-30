@@ -1,0 +1,96 @@
+import React, { useState } from 'react';
+import { Input, Button, Tabs, Typography, Form } from 'antd';
+import { useAuthContext } from '../hooks/useAuthContext';
+import { login } from '../api/auth';
+import styles from './LoginPage.module.scss';
+import classNames from 'classnames/bind';
+
+const cx = classNames.bind(styles);
+const { Title, Text, Link } = Typography;
+
+const LoginPage: React.FC = () => {
+  const { setUser, setToken } = useAuthContext();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const onFinish = async (values: { email: string; password: string }) => {
+    setLoading(true);
+    setError('');
+    try {
+      // Gọi API login chuẩn qua api/auth
+      const res = await login(values);
+      setUser(res.user);
+      setToken(res.token);
+      // TODO: chuyển hướng sang trang chính
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={cx('loginBg')}>
+      <div className={cx('loginFormContainer')}>
+        <Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>
+          Login Form
+        </Title>
+        <Tabs
+          defaultActiveKey="login"
+          centered
+          className={cx('tabsNav')}
+          items={[
+            { key: 'login', label: 'Login' },
+            { key: 'signup', label: 'Signup', disabled: true },
+          ]}
+        />
+        <Form layout="vertical" onFinish={onFinish} style={{ marginTop: 16 }}>
+          <Form.Item name="email" rules={[{ required: true, message: 'Please enter your email' }]}>
+            <Input placeholder="Email Address" size="large" autoComplete="email" />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: 'Please enter your password' }]}
+          >
+            <Input.Password placeholder="Password" size="large" autoComplete="current-password" />
+          </Form.Item>
+          <div style={{ marginBottom: 16, textAlign: 'right' }}>
+            <Link href="#" style={{ color: '#e75480' }}>
+              Forgot password?
+            </Link>
+          </div>
+          {error && (
+            <Text className={cx('typographyDanger')} type="danger">
+              {error}
+            </Text>
+          )}
+          <Button
+            type="primary"
+            htmlType="submit"
+            block
+            size="large"
+            loading={loading}
+            className={cx('btnPrimary')}
+            style={{
+              background: 'linear-gradient(90deg, #e75480 0%, #a4508b 100%)',
+              border: 'none',
+              marginTop: 8,
+            }}
+          >
+            Login
+          </Button>
+        </Form>
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <Text>
+            Not a member?{' '}
+            <Link href="#" style={{ color: '#e75480' }}>
+              Signup now
+            </Link>
+          </Text>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;
