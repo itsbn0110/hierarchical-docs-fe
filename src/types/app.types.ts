@@ -9,7 +9,7 @@ export interface User {
   updatedAt: string;
 }
 
-export type UserRole = 'RootAdmin' | 'User';
+export type UserRole = "RootAdmin" | "User";
 
 export interface Node {
   _id: string;
@@ -24,7 +24,7 @@ export interface Node {
   updatedAt: string;
 }
 
-export type NodeType = 'FOLDER' | 'FILE';
+export type NodeType = "FOLDER" | "FILE";
 
 export interface Permission {
   _id: string;
@@ -35,7 +35,7 @@ export interface Permission {
   grantedAt: string;
 }
 
-export type PermissionLevel = 'Owner' | 'Editor' | 'Viewer';
+export type PermissionLevel = "Owner" | "Editor" | "Viewer";
 
 export interface AccessRequest {
   _id: string;
@@ -50,7 +50,7 @@ export interface AccessRequest {
   createdAt: string;
 }
 
-export type RequestStatus = 'PENDING' | 'APPROVED' | 'DENIED';
+export type RequestStatus = "PENDING" | "APPROVED" | "DENIED";
 
 export interface ActivityLog {
   _id: string;
@@ -63,9 +63,25 @@ export interface ActivityLog {
 }
 
 export type ActivityAction =
-  | 'NODE_CREATED'
-  | 'NODE_RENAMED'
-  | 'NODE_MOVED'
-  | 'NODE_DELETED'
-  | 'PERMISSION_GRANTED'
-  | 'PERMISSION_REVOKED';
+  | "NODE_CREATED"
+  | "NODE_RENAMED"
+  | "NODE_MOVED"
+  | "NODE_DELETED"
+  | "PERMISSION_GRANTED"
+  | "PERMISSION_REVOKED";
+
+export interface CreateUserDto {
+  username: string;
+  email: string;
+  role: "RootAdmin" | "User";
+  isActive: boolean;
+  mustChangePassword?: boolean;
+}
+
+export interface UpdateUserDto {
+  username?: string;
+  email?: string;
+  role?: "RootAdmin" | "User";
+  isActive?: boolean;
+  mustChangePassword?: boolean;
+}

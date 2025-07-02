@@ -1,5 +1,5 @@
 // Các kiểu dữ liệu liên quan đến Auth
-import type { User } from './app.types';
+import type { User } from "./app.types";
 
 export interface LoginPayload {
   email: string;
@@ -8,5 +8,6 @@ export interface LoginPayload {
 
 export interface LoginResponse {
   user: User;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }

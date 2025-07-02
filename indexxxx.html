@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Giao diện: Phân quyền Admin & User</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 10px;
+    }
+
+    .tree-item>ul {
+      display: none;
+    }
+
+    .tree-item.expanded>ul {
+      display: block;
+    }
+
+    .tree-item>div>.expander-icon {
+      transition: transform 0.2s;
+    }
+
+    .tree-item.expanded>div>.expander-icon {
+      transform: rotate(90deg);
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 antialiased">
+
+  <div class="absolute top-2 left-1/2 -translate-x-1/2 z-50 bg-white p-2 rounded-lg shadow-lg flex space-x-2">
+    <span class="text-sm font-medium mr-2">Chế độ xem:</span>
+    <button id="view-as-user-btn"
+      class="px-3 py-1 text-sm font-semibold rounded-md bg-blue-600 text-white">User</button>
+    <button id="view-as-admin-btn" class="px-3 py-1 text-sm font-semibold rounded-md bg-gray-200 text-gray-700">Root
+      Admin</button>
+  </div>
+
+  <div class="flex flex-col h-screen">
+    <header class="bg-white border-b border-gray-200 flex items-center justify-between px-6 py-3 shrink-0">
+      <div class="flex items-center space-x-4">
+        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+        </svg>
+        <span class="text-xl font-semibold text-gray-700">Tài liệu</span>
+      </div>
+      <div class="flex-1 max-w-2xl">
+        <div class="relative"><input type="search" placeholder="Tìm trong tài liệu..."
+            class="w-full bg-gray-100 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=A" alt="Avatar người dùng" id="avatar"
+          class="w-10 h-10 rounded-full cursor-pointer">
+      </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+      <aside class="w-64 bg-white p-4 shrink-0 overflow-y-auto custom-scrollbar border-r border-gray-200">
+        <button
+          class="w-full flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-full hover:bg-blue-700 transition shadow-md mb-6">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Tạo mới
+        </button>
+
+        <nav id="main-nav" class="space-y-1"></nav>
+
+      </aside>
+
+      <main class="flex-1 bg-gray-50 p-6 overflow-y-auto custom-scrollbar">
+        <div id="breadcrumb" class="text-lg font-semibold text-gray-800">Drive của tôi</div>
+        <div id="main-content" class="mt-4 text-gray-500">Nội dung thư mục sẽ hiện ở đây...</div>
+      </main>
+      <aside id="details-panel"
+        class="w-80 bg-white p-6 shrink-0 border-l border-gray-200 overflow-y-auto custom-scrollbar hidden">
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // --- STATE QUẢN LÝ VAI TRÒ ---
+    let currentUserRole = 'USER'; // Mặc định là User
+
+    // --- CẤU HÌNH MENU ---
+    const userMenuItems = [
+      { id: 'my-drive', label: 'Drive của tôi', icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg>` },
+      { id: 'shared', label: 'Được chia sẻ với tôi', icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>` },
+      { id: 'recent', label: 'Gần đây', icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` },
+      { id: 'trash', label: 'Thùng rác', icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>` },
+    ];
+
+    const adminMenuItems = [
+      { isSeparator: true }, // Dòng kẻ phân cách
+      { id: 'admin-users', label: 'Quản lý Người dùng', icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>` },
+      { id: 'admin-system', label: 'Quản lý Hệ thống', icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>` },
+    ];
+
+    let activeMenuItem = 'my-drive';
+
+    // --- HÀM RENDER ĐỘNG ---
+    function renderNavigation() {
+      const navEl = document.getElementById('main-nav');
+      navEl.innerHTML = ''; // Xóa menu cũ
+
+      let itemsToRender = [...userMenuItems];
+
+      // Nếu là admin, thêm các mục menu của admin vào
+      if (currentUserRole === 'ROOT_ADMIN') {
+        itemsToRender.push(...adminMenuItems);
+      }
+
+      itemsToRender.forEach(item => {
+        if (item.isSeparator) {
+          navEl.innerHTML += `<hr class="my-2 border-gray-200">`;
+          return;
+        }
+
+        const isActive = item.id === activeMenuItem;
+        const activeClasses = 'font-semibold bg-blue-100 text-blue-800';
+        const inactiveClasses = 'text-gray-600 hover:bg-gray-100 hover:text-gray-900';
+
+        navEl.innerHTML += `<a href="#" data-id="${item.id}" class="nav-item flex items-center space-x-3 py-2 px-3 rounded-md transition ${isActive ? activeClasses : inactiveClasses}">
+                                        ${item.icon}
+                                        <span>${item.label}</span>
+                                    </a>`;
+      });
+    }
+
+    function updateView() {
+      document.getElementById('avatar').src = currentUserRole === 'ROOT_ADMIN'
+        ? 'https://placehold.co/40x40/FECACA/991B1B?text=AD' // Avatar Admin màu đỏ
+        : 'https://placehold.co/40x40/E2E8F0/4A5568?text=U'; // Avatar User màu xám
+      renderNavigation();
+    }
+
+    // --- EVENT LISTENERS ---
+    document.getElementById('view-as-user-btn').addEventListener('click', () => {
+      currentUserRole = 'USER';
+      document.getElementById('view-as-user-btn').classList.add('bg-blue-600', 'text-white');
+      document.getElementById('view-as-admin-btn').classList.remove('bg-blue-600', 'text-white');
+      updateView();
+    });
+
+    document.getElementById('view-as-admin-btn').addEventListener('click', () => {
+      currentUserRole = 'ROOT_ADMIN';
+      document.getElementById('view-as-admin-btn').classList.add('bg-blue-600', 'text-white');
+      document.getElementById('view-as-user-btn').classList.remove('bg-blue-600', 'text-white');
+      updateView();
+    });
+
+    document.getElementById('main-nav').addEventListener('click', (e) => {
+      const navItem = e.target.closest('.nav-item');
+      if (navItem) {
+        e.preventDefault();
+        activeMenuItem = navItem.dataset.id;
+        renderNavigation(); // Render lại để cập nhật highlight
+      }
+    });
+
+
+    // --- KHỞI TẠO BAN ĐẦU ---
+    updateView();
+
+  </script>
+</body>
+
+</html>

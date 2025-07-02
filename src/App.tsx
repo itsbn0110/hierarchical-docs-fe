@@ -1,53 +1,47 @@
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import ConfirmModal from './components/common/ConfirmModal';
-import UserInfo from './components/UserInfo';
-import LoginPage from './pages/LoginPage';
+import { Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/LoginPage/LoginPage";
+import UserManagementPage from "./pages/UserManagement/UserManagementPage";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import MainLayout from "./layouts/MainLayout";
+import DriveHomePage from "./pages/DriveHomePage/DriveHomePage";
+import FolderPage from "./pages/FolderPage/FolderPage";
+import FilePage from "./pages/FilePage/FilePage";
+const NotFound = () => <div>Unauthorized</div>;
 
 function App() {
-  const [count, setCount] = useState(0);
-  const [modalOpen, setModalOpen] = useState(true);
   return (
-    <BrowserRouter>
+    <>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/"
-          element={
-            <>
-              <div>
-                <a href="https://vite.dev" target="_blank">
-                  <img src={viteLogo} className="logo" alt="Vite logo" />
-                </a>
-                <a href="https://react.dev" target="_blank">
-                  <img src={reactLogo} className="logo react" alt="React logo" />
-                </a>
-              </div>
-              <h1 style={{ fontSize: '1.2rem' }}>Vite + React</h1>
-              <UserInfo />
-              <div className="card">
-                <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-                <p>
-                  Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-              </div>
-              <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-              <ConfirmModal
-                open={modalOpen}
-                title="Confirm Action"
-                content="Are you sure you want to proceed?"
-                onOk={() => {
-                  /* handle OK */
-                }}
-                onCancel={() => setModalOpen(false)}
-              />
-            </>
-          }
-        />
+        <Route path="/unauthorized" element={<NotFound />} />
+        <Route path="/" element={<MainLayout />}>
+          {/* Trang chủ của Drive, hiển thị các thư mục gốc */}
+          <Route index element={<DriveHomePage />} />
+
+          {/* Route để hiển thị nội dung một thư mục */}
+          <Route path="/drive/:folderId" element={<FolderPage />} />
+
+          {/* Route để hiển thị nội dung một file */}
+          <Route path="/file/:fileId" element={<FilePage />} />
+
+          {/* Route quản lý người dùng cho Admin */}
+          <Route path="/users" element={<UserManagementPage />} />
+
+          {/* Các route khác như /shared, /recent... */}
+        </Route>
       </Routes>
-    </BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </>
   );
 }
 
