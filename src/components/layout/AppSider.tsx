@@ -20,6 +20,27 @@ import { nodeApi } from "../../api/node";
 import type { TreeNodeDto } from "../../types/node.types";
 import classNames from "classnames";
 
+// --- CSS tùy chỉnh cho Tree ---
+const SiderTreeStyles = `
+  /* Sửa lại class của Ant Design để icon và title luôn thẳng hàng */
+  .sider-drive-tree .ant-tree-node-content-wrapper {
+    display: inline-flex !important;
+    align-items: center !important;
+    width: 100%;
+  }
+
+  /* Đảm bảo title không bị xuống dòng và có dấu ... khi dài */
+  .sider-drive-tree .ant-tree-title {
+    display: inline-block;
+    max-width: 160px; /* Điều chỉnh chiều rộng tối đa tại đây */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    margin-left: 4px; /* Thêm khoảng cách nhỏ với icon */
+  }
+`;
+
 // --- Các mục menu tĩnh ---
 const mainMenuItems = [
   { key: "shared", label: "Được chia sẻ với tôi", icon: <UsergroupAddOutlined />, path: "/shared" },
@@ -168,23 +189,6 @@ const AppSider: React.FC = () => {
     );
   };
 
-  // --- [SỬA LẠI] Hàm render tiêu đề cho Tree, quay về dùng span ---
-  const titleRender = (node: DataNode) => (
-    <span
-      style={{
-        display: "inline-block", // Giữ trên cùng một hàng với icon
-        maxWidth: "160px",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        verticalAlign: "middle",
-      }}
-      title={node.title as string}
-    >
-      {node.title as React.ReactNode}
-    </span>
-  );
-
   const isMyDriveActive =
     location.pathname === "/" ||
     location.pathname.startsWith("/drive/") ||
@@ -192,6 +196,7 @@ const AppSider: React.FC = () => {
 
   return (
     <div style={{ padding: 16, height: "100%", display: "flex", flexDirection: "column" }}>
+      <style>{SiderTreeStyles}</style>
       <div style={{ padding: "0 8px 0 0" }}>
         <Button
           type="primary"
@@ -203,9 +208,7 @@ const AppSider: React.FC = () => {
         </Button>
       </div>
 
-      <div
-        style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0, paddingRight: 4 }}
-      >
+      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0, paddingRight: 4 }}>
         {/* Phần "Drive của tôi" */}
         <div
           className={classNames("sider-menu-item", isMyDriveActive && "sider-menu-item--active")}
@@ -248,6 +251,7 @@ const AppSider: React.FC = () => {
               </div>
             ) : (
               <Tree
+                className="sider-drive-tree" // Thêm className để CSS có thể áp dụng
                 showIcon
                 blockNode
                 loadData={onLoadData}
@@ -257,7 +261,6 @@ const AppSider: React.FC = () => {
                 expandedKeys={expandedKeys}
                 onExpand={onExpand}
                 style={{ background: "transparent" }}
-                titleRender={titleRender}
               />
             )}
           </div>
