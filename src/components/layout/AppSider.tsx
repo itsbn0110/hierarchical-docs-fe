@@ -1,43 +1,50 @@
 import React, { useState, useEffect } from "react";
-import { Button, Divider, Tree, Spin, message } from "antd";
+import { Divider, Tree, Spin, message } from "antd";
 import type { DataNode, TreeProps } from "antd/es/tree";
 import {
   FolderOpenOutlined,
-  FileTextOutlined,
   TeamOutlined,
   SettingOutlined,
-  PlusOutlined,
   UsergroupAddOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
   CaretDownOutlined,
   CaretRightOutlined,
-  FolderOutlined as AntFolderOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { nodeApi } from "../../api/node";
 import type { TreeNodeDto } from "../../types/node.types";
 import classNames from "classnames";
+import CreateNewButton from "./CreateNewNodeButton";
+import FileIcon from "../common/Icons/FileIcon";
+import FolderIcon from "../common/Icons/FolderIcon";
+// --- [SỬA] Định nghĩa lại CustomDataNode để chứa 'type' ---
+interface CustomDataNode extends DataNode {
+  type: "FOLDER" | "FILE";
+}
 
 // --- CSS tùy chỉnh cho Tree ---
 const SiderTreeStyles = `
-  /* Sửa lại class của Ant Design để icon và title luôn thẳng hàng */
   .sider-drive-tree .ant-tree-node-content-wrapper {
     display: inline-flex !important;
     align-items: center !important;
     width: 100%;
   }
-
-  /* Đảm bảo title không bị xuống dòng và có dấu ... khi dài */
   .sider-drive-tree .ant-tree-title {
     display: inline-block;
-    max-width: 160px; /* Điều chỉnh chiều rộng tối đa tại đây */
+    max-width: 160px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
-    margin-left: 4px; /* Thêm khoảng cách nhỏ với icon */
+    margin-left: 4px;
+  }
+  .sider-drive-tree .ant-tree-indent-unit {
+    width: 16px !important; /* Giảm khoảng cách mỗi cấp, mặc định là 24px */
+  }
+  .sider-drive-tree .ant-tree-switcher {
+    width: 16px !important; /* Giảm chiều rộng của khu vực chứa mũi tên */
   }
 `;
 
@@ -53,12 +60,13 @@ const adminMenuItems = [
   { key: "system", label: "Quản lý Hệ thống", icon: <SettingOutlined />, path: "/system" },
 ];
 
-// --- Hàm tiện ích cho Tree ---
-const transformToDataNode = (node: TreeNodeDto): DataNode => ({
+// --- [SỬA] Hàm tiện ích cho Tree để trả về CustomDataNode ---
+const transformToDataNode = (node: TreeNodeDto): CustomDataNode => ({
   key: node.id,
   title: node.name,
-  icon: node.type === "FOLDER" ? <AntFolderOutlined /> : <FileTextOutlined />,
-  isLeaf: node.type === "FILE",
+  icon: node.type === "FOLDER" ? <FolderIcon /> : <FileIcon />,
+  isLeaf: !node.hasChildren,
+  type: node.type, // Thêm lại thuộc tính type
 });
 
 const AppSider: React.FC = () => {
@@ -69,7 +77,7 @@ const AppSider: React.FC = () => {
   const [treeData, setTreeData] = useState<DataNode[]>([]);
   const [treeLoading, setTreeLoading] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string>("my-drive");
-  const [isDriveOpen, setIsDriveOpen] = useState(true);
+  const [isDriveOpen, setIsDriveOpen] = useState(false);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
   // --- Đồng bộ mục được chọn với URL ---
@@ -105,7 +113,7 @@ const AppSider: React.FC = () => {
 
   const onLoadData: TreeProps["loadData"] = (node) => {
     return new Promise<void>((resolve) => {
-      if (node.children || node.isLeaf) {
+      if (node.children) {
         resolve();
         return;
       }
@@ -124,7 +132,26 @@ const AppSider: React.FC = () => {
     });
   };
 
-  // --- Tải dữ liệu gốc cho cây khi component mount ---
+  // --- Hàm làm mới một node trên cây ---
+  const refreshNode = async (nodeId: string | null) => {
+    try {
+      const children = await nodeApi.getNodesByParentId(nodeId);
+      if (nodeId === null) {
+        setTreeData(children.map(transformToDataNode));
+      } else {
+        setTreeData((currentData) =>
+          updateTreeData(currentData, nodeId, children.map(transformToDataNode))
+        );
+        if (!expandedKeys.includes(nodeId)) {
+          setExpandedKeys([...expandedKeys, nodeId]);
+        }
+      }
+    } catch {
+      message.error("Không thể làm mới cây thư mục.");
+    }
+  };
+
+  // --- Tải dữ liệu gốc ---
   useEffect(() => {
     setTreeLoading(true);
     nodeApi
@@ -142,11 +169,14 @@ const AppSider: React.FC = () => {
     navigate(path);
   };
 
+  // --- [SỬA] Logic onTreeSelect để dùng CustomDataNode ---
   const onTreeSelect: TreeProps["onSelect"] = (keys, info) => {
     if (keys.length === 0) return;
     const key = keys[0] as string;
+    const node = info.node as unknown as CustomDataNode; // Ép kiểu về CustomDataNode
     setSelectedKey(key);
-    if (info.node.isLeaf) {
+    if (node.type === "FILE") {
+      // Dùng type để quyết định
       navigate(`/file/${key}`);
     } else {
       navigate(`/drive/${key}`);
@@ -195,84 +225,80 @@ const AppSider: React.FC = () => {
     location.pathname.startsWith("/file/");
 
   return (
-    <div style={{ padding: 16, height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <style>{SiderTreeStyles}</style>
-      <div style={{ padding: "0 8px 0 0" }}>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          block
-          style={{ fontWeight: 600, fontSize: 18, marginBottom: 24, height: 48 }}
-        >
-          Tạo mới
-        </Button>
+      <div style={{ padding: 16 }}>
+        <CreateNewButton onNodeCreated={refreshNode} />
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0, paddingRight: 4 }}>
-        {/* Phần "Drive của tôi" */}
-        <div
-          className={classNames("sider-menu-item", isMyDriveActive && "sider-menu-item--active")}
-          onClick={() => setIsDriveOpen(!isDriveOpen)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "12px 16px",
-            borderRadius: 8,
-            cursor: "pointer",
-            fontWeight: isMyDriveActive ? 600 : 400,
-            fontSize: 17,
-            color: isMyDriveActive ? "#2563eb" : "#374151",
-            background: isMyDriveActive ? "#e8f0fe" : "transparent",
-            marginBottom: 2,
-          }}
-        >
-          <span style={{ fontSize: 18, marginRight: 4, transform: "translateY(2px)" }}>
-            {isDriveOpen ? <CaretDownOutlined /> : <CaretRightOutlined />}
-          </span>
-          <span style={{ fontSize: 22, marginRight: 12 }}>
-            <FolderOpenOutlined />
-          </span>
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              handleStaticItemSelect("my-drive", "/");
+      <div
+        style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0, paddingRight: 4 }}
+      >
+        <div style={{ padding: "4px 16px 16px" }}>
+          <div
+            className={classNames("sider-menu-item", isMyDriveActive && "sider-menu-item--active")}
+            onClick={() => setIsDriveOpen(!isDriveOpen)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "12px 16px",
+              borderRadius: 8,
+              cursor: "pointer",
+              fontWeight: isMyDriveActive ? 600 : 400,
+              fontSize: 17,
+              color: isMyDriveActive ? "#2563eb" : "#374151",
+              background: isMyDriveActive ? "#e8f0fe" : "transparent",
+              marginBottom: 2,
             }}
           >
-            Drive của tôi
-          </span>
-        </div>
-
-        {/* Cây thư mục động */}
-        {isDriveOpen && (
-          <div style={{ paddingLeft: 16, marginTop: 4 }}>
-            {treeLoading ? (
-              <div style={{ textAlign: "center", padding: 10 }}>
-                <Spin />
-              </div>
-            ) : (
-              <Tree
-                className="sider-drive-tree" // Thêm className để CSS có thể áp dụng
-                showIcon
-                blockNode
-                loadData={onLoadData}
-                treeData={treeData}
-                onSelect={onTreeSelect}
-                selectedKeys={[selectedKey]}
-                expandedKeys={expandedKeys}
-                onExpand={onExpand}
-                style={{ background: "transparent" }}
-              />
-            )}
+            <span style={{ fontSize: 16, marginRight: 10, transform: "translateY(2px)" }}>
+              {isDriveOpen ? <CaretDownOutlined /> : <CaretRightOutlined />}
+            </span>
+            <span style={{ fontSize: 22, marginRight: 12 }}>
+              <FolderOpenOutlined />
+            </span>
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStaticItemSelect("my-drive", "/");
+              }}
+            >
+              Drive của tôi
+            </span>
           </div>
-        )}
 
-        {/* Các mục menu tĩnh khác */}
-        {mainMenuItems.map(renderStaticItem)}
+          {/* Cây thư mục động */}
+          {isDriveOpen && (
+            <div style={{ paddingLeft: 14, marginTop: 4 }}>
+              {treeLoading ? (
+                <div style={{ textAlign: "center", padding: 10 }}>
+                  <Spin />
+                </div>
+              ) : (
+                <Tree
+                  className="sider-drive-tree"
+                  showIcon
+                  blockNode
+                  loadData={onLoadData}
+                  treeData={treeData}
+                  onSelect={onTreeSelect}
+                  selectedKeys={[selectedKey]}
+                  expandedKeys={expandedKeys}
+                  onExpand={onExpand}
+                  style={{ background: "transparent" }}
+                />
+              )}
+            </div>
+          )}
 
-        <Divider style={{ margin: "18px 0 12px 0" }} />
+          {/* Các mục menu tĩnh khác */}
+          {mainMenuItems.map(renderStaticItem)}
 
-        {/* Menu cho Admin */}
-        {user?.role === "RootAdmin" && adminMenuItems.map(renderStaticItem)}
+          <Divider style={{ margin: "18px 0 12px 0" }} />
+
+          {/* Menu cho Admin */}
+          {user?.role === "RootAdmin" && adminMenuItems.map(renderStaticItem)}
+        </div>
       </div>
     </div>
   );

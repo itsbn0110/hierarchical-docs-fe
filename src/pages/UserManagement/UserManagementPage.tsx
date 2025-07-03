@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Space, Modal, Form, Input, Select, Tag } from "antd";
-import {
-  getUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser,
-} from "../../api/user";
+import { getUsers, getUserById, createUser, updateUser, deleteUser } from "../../api/user";
 import type { User } from "../../types/app.types";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -64,8 +58,7 @@ const UserManagementPage: React.FC = () => {
   const handleDelete = (_id: string) => {
     Modal.confirm({
       title: "Xác nhận xóa",
-      content:
-        "Bạn có chắc chắn muốn xóa người dùng này? Khi xóa mọi dữ liệu liên quan sẽ bị mất!",
+      content: "Bạn có chắc chắn muốn xóa người dùng này? Khi xóa mọi dữ liệu liên quan sẽ bị mất!",
       okText: "Xóa",
       okType: "danger",
       cancelText: "Hủy",
@@ -83,9 +76,7 @@ const UserManagementPage: React.FC = () => {
         const { email: _, ...updateValues } = values;
         await updateUser(editUser._id, updateValues);
         setUsers((prev) =>
-          prev.map((u) =>
-            u._id === editUser._id ? { ...u, ...updateValues } : u
-          )
+          prev.map((u) => (u._id === editUser._id ? { ...u, ...updateValues } : u))
         );
         toast.success(SuccessMessages.USER_UPDATED);
       } else {
@@ -111,18 +102,14 @@ const UserManagementPage: React.FC = () => {
       title: "Role",
       dataIndex: "role",
       key: "role",
-      render: (role: string) => (
-        <Tag color={role === "RootAdmin" ? "volcano" : "blue"}>{role}</Tag>
-      ),
+      render: (role: string) => <Tag color={role === "RootAdmin" ? "volcano" : "blue"}>{role}</Tag>,
     },
     {
       title: "Active",
       dataIndex: "isActive",
       key: "isActive",
       render: (active: boolean) => (
-        <Tag color={active ? "green" : "red"}>
-          {active ? "Active" : "Inactive"}
-        </Tag>
+        <Tag color={active ? "green" : "red"}>{active ? "Active" : "Inactive"}</Tag>
       ),
     },
     {
@@ -161,9 +148,11 @@ const UserManagementPage: React.FC = () => {
         type="primary"
         style={{
           marginBottom: 24,
+          padding: "22px",
           minWidth: 100,
           fontWeight: 500,
-          fontSize: 13,
+          fontSize: 15,
+          float: "right",
         }}
         onClick={openAddModal}
       >
@@ -200,11 +189,7 @@ const UserManagementPage: React.FC = () => {
           >
             <Input type="email" disabled={editUser ? true : false} />
           </Form.Item>
-          <Form.Item
-            name="role"
-            label="Role"
-            rules={[{ required: true, message: "Chọn vai trò" }]}
-          >
+          <Form.Item name="role" label="Role" rules={[{ required: true, message: "Chọn vai trò" }]}>
             <Select>
               <Option value="RootAdmin">RootAdmin</Option>
               <Option value="User">User</Option>

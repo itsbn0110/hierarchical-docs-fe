@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Spin, Table, Typography, message, Breadcrumb, Empty } from "antd";
-import { nodeApi } from "../../api/node"; // Sửa lỗi: đường dẫn import
+import { nodeApi } from "../../api/node";
 import type { Node } from "../../types/app.types";
 import type { TreeNodeDto } from "../../types/node.types";
-import { FolderOutlined, FileTextOutlined, HomeOutlined } from "@ant-design/icons";
-
+import { HomeOutlined } from "@ant-design/icons";
+import FileIcon from "../../components/common/Icons/FileIcon";
+import FolderIcon from "../../components/common/Icons/FolderIcon";
 const { Title } = Typography;
 
 const FolderPage: React.FC = () => {
@@ -33,6 +34,7 @@ const FolderPage: React.FC = () => {
         setCurrentFolder(folderDetails);
         setNodes(folderContent);
       } catch (error) {
+        console.log(error);
         message.error("Không thể tải nội dung thư mục hoặc bạn không có quyền truy cập.");
         setCurrentFolder(null);
         setNodes([]);
@@ -68,11 +70,7 @@ const FolderPage: React.FC = () => {
       key: "name",
       render: (text: string, record: TreeNodeDto) => (
         <div style={{ display: "flex", alignItems: "center" }}>
-          {record.type === "FOLDER" ? (
-            <FolderOutlined style={{ color: "#1890ff" }} />
-          ) : (
-            <FileTextOutlined />
-          )}
+          {record.type === "FOLDER" ? <FolderIcon /> : <FileIcon />}
           <span style={{ marginLeft: 8 }}>{text}</span>
         </div>
       ),
