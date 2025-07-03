@@ -15,6 +15,7 @@ export interface TreeNodeDto {
   hasChildren: boolean;
   content?: string;
   userPermission: PermissionLevel;
+  createdBy: string;
 }
 
 export interface UpdateNodeContentDto {

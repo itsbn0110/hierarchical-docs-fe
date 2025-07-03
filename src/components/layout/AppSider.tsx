@@ -44,8 +44,10 @@ const SiderTreeStyles = `
     width: 16px !important; /* Giảm khoảng cách mỗi cấp, mặc định là 24px */
   }
   .sider-drive-tree .ant-tree-switcher {
-    width: 16px !important; /* Giảm chiều rộng của khu vực chứa mũi tên */
+    width: 8px !important; /* Giảm chiều rộng của khu vực chứa mũi tên */
   }
+
+ 
 `;
 
 // --- Các mục menu tĩnh ---
@@ -159,7 +161,7 @@ const AppSider: React.FC = () => {
       .then((rootNodes: TreeNodeDto[]) => {
         setTreeData(rootNodes.map(transformToDataNode));
       })
-      .catch(() => message.error("Không thể tải dữ liệu Drive."))
+      .catch(() => console.log("Không thể tải dữ liệu Drive."))
       .finally(() => setTreeLoading(false));
   }, []);
 
@@ -203,11 +205,11 @@ const AppSider: React.FC = () => {
         style={{
           display: "flex",
           alignItems: "center",
-          padding: "12px 16px",
+          padding: "12px 20px",
           borderRadius: 8,
           cursor: "pointer",
           fontWeight: isActive ? 600 : 400,
-          fontSize: 17,
+          fontSize: 16,
           color: isActive ? "#2563eb" : "#374151",
           background: isActive ? "#e8f0fe" : "transparent",
           marginBottom: 2,
@@ -227,7 +229,7 @@ const AppSider: React.FC = () => {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <style>{SiderTreeStyles}</style>
-      <div style={{ padding: 16 }}>
+      <div style={{ padding: 20 }}>
         <CreateNewButton onNodeCreated={refreshNode} />
       </div>
 
@@ -241,7 +243,7 @@ const AppSider: React.FC = () => {
             style={{
               display: "flex",
               alignItems: "center",
-              padding: "12px 16px",
+              padding: "12px 4px",
               borderRadius: 8,
               cursor: "pointer",
               fontWeight: isMyDriveActive ? 600 : 400,
@@ -251,14 +253,15 @@ const AppSider: React.FC = () => {
               marginBottom: 2,
             }}
           >
-            <span style={{ fontSize: 16, marginRight: 10, transform: "translateY(2px)" }}>
+            <span style={{ fontSize: 16, marginRight: 4, transform: "translateY(2px)" }}>
               {isDriveOpen ? <CaretDownOutlined /> : <CaretRightOutlined />}
             </span>
-            <span style={{ fontSize: 22, marginRight: 12 }}>
+            <span style={{ fontSize: 18, marginRight: 12 }}>
               <FolderOpenOutlined />
             </span>
             <span
-              onClick={(e) => {
+                style={{ fontSize: 17}}
+                onClick={(e) => {
                 e.stopPropagation();
                 handleStaticItemSelect("my-drive", "/");
               }}
@@ -269,7 +272,7 @@ const AppSider: React.FC = () => {
 
           {/* Cây thư mục động */}
           {isDriveOpen && (
-            <div style={{ paddingLeft: 14, marginTop: 4 }}>
+            <div style={{ paddingLeft: 18, marginTop: 4 }}>
               {treeLoading ? (
                 <div style={{ textAlign: "center", padding: 10 }}>
                   <Spin />

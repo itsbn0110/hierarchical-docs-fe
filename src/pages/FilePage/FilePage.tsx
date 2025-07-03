@@ -12,7 +12,7 @@ import {
   Collapse,
   Table,
 } from "antd";
-import { EditOutlined, EyeOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { EditOutlined, EyeOutlined, HomeOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { nodeApi } from "../../api/node";
 import type { Node } from "../../types/app.types";
 import ReactMarkdown from "react-markdown";
@@ -142,7 +142,7 @@ const FilePage: React.FC = () => {
           <Col>
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link to="/">Drive của tôi</Link>
+                <Link to="/"><HomeOutlined /></Link>
               </Breadcrumb.Item>
               {file.ancestors.map((ancestor) => (
                 <Breadcrumb.Item key={ancestor._id}>
