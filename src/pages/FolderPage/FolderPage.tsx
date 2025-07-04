@@ -2,44 +2,44 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Spin, Table, Typography, Breadcrumb, Empty } from "antd";
 import { nodeApi } from "../../api/node";
-import type { Node } from "../../types/app.types";
+import { useDriveContext } from "../../hooks/useDriveContext";
+import type { Node as DriveNode } from "../../types/app.types";
 import type { TreeNodeDto } from "../../types/node.types";
-import { HomeOutlined } from "@ant-design/icons";
+import { HomeOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import FileIcon from "../../components/common/Icons/FileIcon";
 import FolderIcon from "../../components/common/Icons/FolderIcon";
 import { toast } from "react-toastify";
+
 const { Title } = Typography;
 
 const FolderPage: React.FC = () => {
   const { folderId } = useParams<{ folderId: string }>();
   const navigate = useNavigate();
+  // [SỬA] Lấy về `selectedNodeId` và `selectNodeId` từ context
+  const { selectNodeId, selectedNodeId, showDetails, toggleDetails } = useDriveContext();
 
-  // State cho danh sách các mục con
   const [nodes, setNodes] = useState<TreeNodeDto[]>([]);
-  // State cho thông tin của chính thư mục hiện tại (để làm breadcrumb)
-  const [currentFolder, setCurrentFolder] = useState<Node | null>(null);
+  const [currentFolder, setCurrentFolder] = useState<DriveNode | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!folderId) return;
 
+    // Bỏ chọn mục cũ khi chuyển sang thư mục mới
+    selectNodeId(null);
     const fetchFolderData = async () => {
       setLoading(true);
       try {
-        // Gọi cả 2 API cùng lúc để tăng hiệu suất
         const [folderDetails, folderContent] = await Promise.all([
-          nodeApi.getNodeById(folderId), // Lấy chi tiết folder hiện tại
-          nodeApi.getNodesByParentId(folderId), // Lấy các mục con bên trong
+          nodeApi.getNodeById(folderId),
+          nodeApi.getNodesByParentId(folderId),
         ]);
-
-        console.log("check folderDetails: ", folderDetails);
-        console.log("check folderContent: ", folderContent);
-
-
+        console.log("folderDetails", folderDetails);
         setCurrentFolder(folderDetails);
         setNodes(folderContent);
+        console.log("folderCon");
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching folder data:", error);
         toast.error("Không thể tải nội dung thư mục hoặc bạn không có quyền truy cập.");
         setCurrentFolder(null);
         setNodes([]);
@@ -49,14 +49,27 @@ const FolderPage: React.FC = () => {
     };
 
     fetchFolderData();
-  }, [folderId]);
+  }, [folderId, selectNodeId]); // [SỬA] Cập nhật dependency array
 
-  // Hàm xử lý khi click vào một hàng trong bảng
+  // [SỬA] handleRowClick không cần gọi API nữa
   const handleRowClick = (record: TreeNodeDto) => {
+    selectNodeId(record.id); // Chỉ cần cập nhật ID vào context
+    showDetails();
+  };
+
+  const handleRowDoubleClick = (record: TreeNodeDto) => {
     if (record.type === "FOLDER") {
       navigate(`/drive/${record.id}`);
     } else {
       navigate(`/file/${record.id}`);
+    }
+  };
+
+  const handleInfoClick = () => {
+    if (currentFolder) {
+      console.log(currentFolder._id);
+      selectNodeId(folderId ?? null); // [SỬA] Cập nhật ID của thư mục hiện tại
+      toggleDetails();
     }
   };
 
@@ -80,36 +93,30 @@ const FolderPage: React.FC = () => {
         </div>
       ),
     },
-    {
-      title: "Chủ sở hữu",
-      dataIndex: "createdBy",
-      key: "createdBy",
-      width: 150,
-    },
-
-    {
-      title: "Quyền của bạn",
-      dataIndex: "userPermission",
-      key: "userPermission",
-      width: 150,
-    },
+    { title: "Chủ sở hữu", dataIndex: "createdBy", key: "createdBy", width: 150 },
+    { title: "Quyền của bạn", dataIndex: "userPermission", key: "userPermission", width: 150 },
   ];
 
   return (
     <div>
-      <Breadcrumb style={{ marginBottom: 16 }}>
-        <Breadcrumb.Item>
-          <Link to="/">
-            <HomeOutlined />
-          </Link>
-        </Breadcrumb.Item>
-        {currentFolder.ancestors.map((ancestor) => (
-          <Breadcrumb.Item key={ancestor._id}>
-            <Link to={`/drive/${ancestor._id}`}>{ancestor.name}</Link>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Breadcrumb style={{ marginBottom: 16 }}>
+          <Breadcrumb.Item>
+            <Link to="/">
+              <HomeOutlined />
+            </Link>
           </Breadcrumb.Item>
-        ))}
-        <Breadcrumb.Item>{currentFolder.name}</Breadcrumb.Item>
-      </Breadcrumb>
+          {currentFolder.ancestors.map((ancestor) => (
+            <Breadcrumb.Item key={ancestor._id}>
+              <Link to={`/drive/${ancestor._id}`}>{ancestor.name}</Link>
+            </Breadcrumb.Item>
+          ))}
+          <Breadcrumb.Item>{currentFolder.name}</Breadcrumb.Item>
+        </Breadcrumb>
+        <span style={{ cursor: "pointer" }} onClick={handleInfoClick}>
+          <InfoCircleOutlined style={{ fontSize: 20 }} />
+        </span>
+      </div>
 
       <Title level={2}>{currentFolder.name}</Title>
 
@@ -119,11 +126,16 @@ const FolderPage: React.FC = () => {
         rowKey="id"
         onRow={(record) => ({
           onClick: () => handleRowClick(record),
+          onDoubleClick: () => handleRowDoubleClick(record),
           style: { cursor: "pointer" },
         })}
-        locale={{
-          emptyText: <Empty description="Thư mục này trống." />,
+        rowSelection={{
+          type: "radio",
+          // [SỬA] Sử dụng selectedNodeId để highlight hàng
+          selectedRowKeys: selectedNodeId ? [selectedNodeId] : [],
+          renderCell: () => null, // Ẩn radio button đi cho đẹp
         }}
+        locale={{ emptyText: <Empty description="Thư mục này trống." /> }}
       />
     </div>
   );

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Spin, Table, Typography, message, Empty } from "antd";
 import { nodeApi } from "../../api/node";
 import type { TreeNodeDto } from "../../types/node.types";
-import { FolderOutlined, FileTextOutlined } from "@ant-design/icons";
+import FolderIcon from "../../components/common/Icons/FolderIcon";
 
 const { Title } = Typography;
 
@@ -46,14 +46,16 @@ const DriveHomePage: React.FC = () => {
       key: "name",
       render: (text: string, record: TreeNodeDto) => (
         <div style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-          {record.type === "FOLDER" ? (
-            <FolderOutlined style={{ marginRight: 8, color: "#1890ff" }} />
-          ) : (
-            <FileTextOutlined style={{ marginRight: 8 }} />
-          )}
-          <span>{text}</span>
+          {record.type === "FOLDER" ? <FolderIcon /> : <FolderIcon />}
+          <span style={{ marginLeft: 8 }}>{text}</span>
         </div>
       ),
+    },
+    {
+      title: "Chủ sở hữu",
+      dataIndex: "createdBy",
+      key: "createdBy",
+      width: 150,
     },
     {
       title: "Quyền của bạn",
@@ -61,6 +63,7 @@ const DriveHomePage: React.FC = () => {
       key: "userPermission",
       width: 150,
     },
+
     // Bạn có thể thêm các cột khác như 'Ngày tạo', 'Người tạo' ở đây
   ];
 

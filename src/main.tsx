@@ -7,13 +7,16 @@ import "@ant-design/v5-patch-for-react-19";
 import "reset-css";
 import { BrowserRouter } from "react-router-dom";
 import "antd/dist/reset.css";
+import { DriveProvider } from "./contexts/DriveContext..tsx";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <GlobalStyles>
-          <App />
-        </GlobalStyles>
+        <DriveProvider>
+          <GlobalStyles>
+            <App />
+          </GlobalStyles>
+        </DriveProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

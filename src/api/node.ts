@@ -6,6 +6,7 @@ import type {
   UpdateNodeContentDto,
   UpdateNodeNameDto,
 } from "../types/node.types";
+import type { Node as DriveNode } from "../types/app.types";
 /**
  * Lấy danh sách các node con của một thư mục cha (hỗ trợ lazy-loading).
  * @param parentId - ID của thư mục cha. Nếu là null, sẽ lấy các node ở cấp gốc.
@@ -21,7 +22,7 @@ export const getNodesByParentId = async (parentId: string | null): Promise<TreeN
   return res.data;
 };
 
-export const getNodeById = async (id: string): Promise<Node> => {
+export const getNodeById = async (id: string): Promise<DriveNode> => {
   const res = await api.get(`/nodes/${id}`);
   return res.data;
 };

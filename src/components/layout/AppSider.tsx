@@ -229,14 +229,14 @@ const AppSider: React.FC = () => {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <style>{SiderTreeStyles}</style>
-      <div style={{ padding: 20 }}>
+      <div style={{ padding: 16 }}>
         <CreateNewButton onNodeCreated={refreshNode} />
       </div>
 
       <div
         style={{ flex: 1, overflowY: "auto", overflowX: "hidden", minHeight: 0, paddingRight: 4 }}
       >
-        <div style={{ padding: "4px 16px 16px" }}>
+        <div style={{ padding: "4px 14px 16px" }}>
           <div
             className={classNames("sider-menu-item", isMyDriveActive && "sider-menu-item--active")}
             onClick={() => setIsDriveOpen(!isDriveOpen)}
@@ -260,8 +260,8 @@ const AppSider: React.FC = () => {
               <FolderOpenOutlined />
             </span>
             <span
-                style={{ fontSize: 17}}
-                onClick={(e) => {
+              style={{ fontSize: 17 }}
+              onClick={(e) => {
                 e.stopPropagation();
                 handleStaticItemSelect("my-drive", "/");
               }}
