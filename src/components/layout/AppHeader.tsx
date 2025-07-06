@@ -50,7 +50,7 @@ const AppHeader: React.FC = () => {
             color: "#334155",
           }}
         >
-          Tài liệu phân cấp
+          Hierarchical Docs
         </span>
       </div>
       <div

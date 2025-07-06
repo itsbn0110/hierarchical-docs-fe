@@ -197,13 +197,18 @@ const UserManagementPage: React.FC = () => {
           </Form.Item>
           <Form.Item name="isActive" label="Active">
             <Select>
-              <Option value={true}>Active</Option>
-              <Option value={false}>Inactive</Option>
+              <Option value={true}>Hoạt động</Option>
+              <Option value={false}>Vô hiệu hóa</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="mustChangePassword" label="Đổi mật khẩu lần đầu ?">
+            <Select>
+              <Option value={true}>Có</Option>
+              <Option value={false}>Không</Option>
             </Select>
           </Form.Item>
         </Form>
       </Modal>
-      {/* Đã chuyển ToastContainer lên App.tsx, không cần ở đây nữa */}
     </div>
   );
 };

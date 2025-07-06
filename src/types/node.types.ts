@@ -1,7 +1,7 @@
 // Định nghĩa các type cho node API
 
 export type NodeType = "FOLDER" | "FILE";
-export type PermissionLevel = "OWNER" | "EDITOR" | "VIEWER" | null; // Sửa lại nếu BE có enum khác
+export type PermissionLevel = "Owner" | "Editor" | "Viewer" | "RootAdmin"; // Sửa lại nếu BE có enum khác
 
 export interface MoveNodeDto {
   newParentId: string | null; // ID thư mục cha mới, null nếu chuyển lên root

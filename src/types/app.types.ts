@@ -12,6 +12,7 @@ export interface User {
 export type UserRole = "RootAdmin" | "User";
 
 export interface Node {
+  userPermission: null;
   _id: string;
   name: string;
   type: NodeType;
