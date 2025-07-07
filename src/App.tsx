@@ -7,6 +7,8 @@ import MainLayout from "./layouts/MainLayout";
 import DriveHomePage from "./pages/DriveHomePage/DriveHomePage";
 import FolderPage from "./pages/FolderPage/FolderPage";
 import FilePage from "./pages/FilePage/FilePage";
+import RequestAccessPage from "./pages/RequestAccessPage/RequestAccessPage";
+import AccessRequestsPage from "./pages/AccessRequestManagement/AccessRequestManagement";
 const NotFound = () => <div>Unauthorized</div>;
 
 function App() {
@@ -15,6 +17,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/unauthorized" element={<NotFound />} />
+        <Route path="/request-access/:nodeType/:nodeId" element={<RequestAccessPage />} />
+
         <Route path="/" element={<MainLayout />}>
           {/* Trang chủ của Drive, hiển thị các thư mục gốc */}
           <Route index element={<DriveHomePage />} />
@@ -27,6 +31,8 @@ function App() {
 
           {/* Route quản lý người dùng cho Admin */}
           <Route path="/users" element={<UserManagementPage />} />
+
+          <Route path="/access-requests" element={<AccessRequestsPage />} />
 
           {/* Các route khác như /shared, /recent... */}
         </Route>

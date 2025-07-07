@@ -30,8 +30,12 @@ body {
 // Thêm các style chung, override font cho Ant Design nếu muốn
 // .ant-typography,
 // .ant-btn,
-// .ant-input,Ư
+// .ant-input,
 // .ant-form,
 // .ant-tabs {
 //   font-family: 'Roboto', 'Segoe UI', Arial, sans-serif !important;
 // }
+
+.ant-input {
+  padding: 0;
+}

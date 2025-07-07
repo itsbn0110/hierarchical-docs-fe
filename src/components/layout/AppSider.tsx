@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Divider, Tree, Spin, message } from "antd";
+import { Divider, Tree, Spin, message, Badge } from "antd"; // Thêm Badge
 import type { DataNode, TreeProps } from "antd/es/tree";
 import {
   FolderOpenOutlined,
@@ -10,21 +10,22 @@ import {
   DeleteOutlined,
   CaretDownOutlined,
   CaretRightOutlined,
+  MailOutlined, // Thêm icon mới
 } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { nodeApi } from "../../api/node";
+import { accessRequestApi } from "../../api/accessRequest.api"; // Import API mới
 import type { TreeNodeDto } from "../../types/node.types";
 import classNames from "classnames";
 import CreateNewButton from "./CreateNewNodeButton";
 import FileIcon from "../common/Icons/FileIcon";
 import FolderIcon from "../common/Icons/FolderIcon";
-// --- [SỬA] Định nghĩa lại CustomDataNode để chứa 'type' ---
+
 interface CustomDataNode extends DataNode {
   type: "FOLDER" | "FILE";
 }
 
-// --- CSS tùy chỉnh cho Tree ---
 const SiderTreeStyles = `
   .sider-drive-tree .ant-tree-node-content-wrapper {
     display: inline-flex !important;
@@ -41,16 +42,13 @@ const SiderTreeStyles = `
     margin-left: 4px;
   }
   .sider-drive-tree .ant-tree-indent-unit {
-    width: 16px !important; /* Giảm khoảng cách mỗi cấp, mặc định là 24px */
+    width: 16px !important;
   }
   .sider-drive-tree .ant-tree-switcher {
-    width: 8px !important; /* Giảm chiều rộng của khu vực chứa mũi tên */
+    width: 8px !important;
   }
-
- 
 `;
 
-// --- Các mục menu tĩnh ---
 const mainMenuItems = [
   { key: "shared", label: "Được chia sẻ với tôi", icon: <UsergroupAddOutlined />, path: "/shared" },
   { key: "recent", label: "Gần đây", icon: <ClockCircleOutlined />, path: "/recent" },
@@ -62,13 +60,12 @@ const adminMenuItems = [
   { key: "system", label: "Quản lý Hệ thống", icon: <SettingOutlined />, path: "/system" },
 ];
 
-// --- [SỬA] Hàm tiện ích cho Tree để trả về CustomDataNode ---
 const transformToDataNode = (node: TreeNodeDto): CustomDataNode => ({
   key: node.id,
   title: node.name,
   icon: node.type === "FOLDER" ? <FolderIcon /> : <FileIcon />,
   isLeaf: !node.hasChildren,
-  type: node.type, // Thêm lại thuộc tính type
+  type: node.type,
 });
 
 const AppSider: React.FC = () => {
@@ -79,10 +76,24 @@ const AppSider: React.FC = () => {
   const [treeData, setTreeData] = useState<DataNode[]>([]);
   const [treeLoading, setTreeLoading] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string>("my-drive");
-  const [isDriveOpen, setIsDriveOpen] = useState(false);
+  const [isDriveOpen, setIsDriveOpen] = useState(true);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
-  // --- Đồng bộ mục được chọn với URL ---
+  // [MỚI] State để lưu số lượng yêu cầu đang chờ
+  const [pendingRequestCount, setPendingRequestCount] = useState(0);
+
+  // [MỚI] useEffect để lấy số lượng yêu cầu
+  useEffect(() => {
+    accessRequestApi
+      .getPendingRequests()
+      .then((requests) => {
+        setPendingRequestCount(requests.length);
+      })
+      .catch((err) => {
+        console.error("Không thể lấy danh sách yêu cầu:", err);
+      });
+  }, []); // Chỉ chạy một lần khi component được mount
+
   useEffect(() => {
     const pathParts = location.pathname.split("/");
     if (location.pathname === "/") {
@@ -100,7 +111,6 @@ const AppSider: React.FC = () => {
     }
   }, [location.pathname]);
 
-  // --- Logic tải dữ liệu cho cây thư mục ---
   const updateTreeData = (list: DataNode[], key: React.Key, children: DataNode[]): DataNode[] => {
     return list.map((node) => {
       if (node.key === key) {
@@ -134,7 +144,6 @@ const AppSider: React.FC = () => {
     });
   };
 
-  // --- Hàm làm mới một node trên cây ---
   const refreshNode = async (nodeId: string | null) => {
     try {
       const children = await nodeApi.getNodesByParentId(nodeId);
@@ -153,7 +162,6 @@ const AppSider: React.FC = () => {
     }
   };
 
-  // --- Tải dữ liệu gốc ---
   useEffect(() => {
     setTreeLoading(true);
     nodeApi
@@ -165,20 +173,17 @@ const AppSider: React.FC = () => {
       .finally(() => setTreeLoading(false));
   }, []);
 
-  // --- Các hàm xử lý sự kiện ---
   const handleStaticItemSelect = (key: string, path: string) => {
     setSelectedKey(key);
     navigate(path);
   };
 
-  // --- [SỬA] Logic onTreeSelect để dùng CustomDataNode ---
   const onTreeSelect: TreeProps["onSelect"] = (keys, info) => {
     if (keys.length === 0) return;
     const key = keys[0] as string;
-    const node = info.node as unknown as CustomDataNode; // Ép kiểu về CustomDataNode
+    const node = info.node as unknown as CustomDataNode;
     setSelectedKey(key);
     if (node.type === "FILE") {
-      // Dùng type để quyết định
       navigate(`/file/${key}`);
     } else {
       navigate(`/drive/${key}`);
@@ -189,7 +194,6 @@ const AppSider: React.FC = () => {
     setExpandedKeys(keys);
   };
 
-  // --- Hàm render cho các mục tĩnh ---
   const renderStaticItem = (item: {
     key: string;
     label: string;
@@ -225,6 +229,18 @@ const AppSider: React.FC = () => {
     location.pathname === "/" ||
     location.pathname.startsWith("/drive/") ||
     location.pathname.startsWith("/file/");
+
+  // [MỚI] Tạo item động cho yêu cầu truy cập
+  const accessRequestItem = {
+    key: "access-requests",
+    label: "Yêu cầu truy cập",
+    icon: (
+      <Badge count={pendingRequestCount} size="small">
+        <MailOutlined />
+      </Badge>
+    ),
+    path: "/access-requests",
+  };
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -270,7 +286,6 @@ const AppSider: React.FC = () => {
             </span>
           </div>
 
-          {/* Cây thư mục động */}
           {isDriveOpen && (
             <div style={{ paddingLeft: 18, marginTop: 4 }}>
               {treeLoading ? (
@@ -294,12 +309,12 @@ const AppSider: React.FC = () => {
             </div>
           )}
 
-          {/* Các mục menu tĩnh khác */}
+          {/* [SỬA] Hiển thị item mới nếu có yêu cầu */}
+          {pendingRequestCount > 0 && renderStaticItem(accessRequestItem)}
           {mainMenuItems.map(renderStaticItem)}
 
           <Divider style={{ margin: "18px 0 12px 0" }} />
 
-          {/* Menu cho Admin */}
           {user?.role === "RootAdmin" && adminMenuItems.map(renderStaticItem)}
         </div>
       </div>

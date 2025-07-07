@@ -86,3 +86,41 @@ export interface UpdateUserDto {
   isActive?: boolean;
   mustChangePassword?: boolean;
 }
+
+export interface SearchResultDto {
+  nodeId: string; // Backend đã biến đổi ObjectId thành string
+  name: string;
+  type: NodeType;
+  accessStatus: AccessStatus;
+  score?: number; // Điểm số liên quan, có thể không có
+}
+export type AccessStatus = "OWNER" | "EDITOR" | "VIEWER" | "NO_ACCESS";
+
+// Giả định bạn đã có định nghĩa cho PermissionLevel ở frontend
+// export type PermissionLevel = 'VIEWER' | 'EDITOR' | 'OWNER';
+
+/**
+ * Interface định nghĩa cấu trúc dữ liệu để gửi yêu cầu xin quyền truy cập.
+ * Đây là phiên bản frontend của CreateAccessRequestDto ở backend.
+ */
+export interface CreateAccessRequestDto {
+  /**
+   * ID của Node (file hoặc folder) mà người dùng muốn xin quyền.
+   */
+  nodeId: string;
+
+  /**
+   * Cấp độ quyền mà người dùng yêu cầu (chỉ có thể là 'VIEWER' hoặc 'EDITOR').
+   */
+  requestedPermission: "Viewer" | "Editor";
+
+  /**
+   * (Tùy chọn) Áp dụng yêu cầu cho cả các thư mục con. Mặc định là false.
+   */
+  isRecursive?: boolean;
+
+  /**
+   * (Tùy chọn) Lời nhắn gửi cho chủ sở hữu.
+   */
+  message?: string;
+}

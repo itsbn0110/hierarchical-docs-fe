@@ -54,7 +54,12 @@ const LoginPage: React.FC = () => {
         />
         <Form layout="vertical" onFinish={onFinish} style={{ marginTop: 16 }}>
           <Form.Item name="email" rules={[{ required: true, message: "Please enter your email" }]}>
-            <Input placeholder="Email Address" size="large" autoComplete="email" />
+            <Input
+              placeholder="Email Address"
+              size="large"
+              autoComplete="email"
+              style={{ padding: "6px 12px" }}
+            />
           </Form.Item>
           <Form.Item
             name="password"

@@ -1,13 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Spin, Table, Typography, Breadcrumb, Empty, Dropdown, Menu, Modal, Input, Button, Space } from "antd";
-import type { TableProps } from 'antd';
+import {
+  Spin,
+  Table,
+  Typography,
+  Breadcrumb,
+  Empty,
+  Dropdown,
+  Menu,
+  Modal,
+  Input,
+  Button,
+  Space,
+} from "antd";
+import type { TableProps } from "antd";
 import { nodeApi } from "../../api/node";
 import { useDriveContext } from "../../hooks/useDriveContext";
 import { useCreateNode } from "../../hooks/useCreateNode";
-import type { Node as DriveNode,  } from "../../types/app.types";
+import type { Node as DriveNode } from "../../types/app.types";
 import type { TreeNodeDto } from "../../types/node.types";
-import { HomeOutlined, InfoCircleOutlined, EditOutlined, ShareAltOutlined, DeleteOutlined, ExclamationCircleFilled, MoreOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  InfoCircleOutlined,
+  EditOutlined,
+  ShareAltOutlined,
+  DeleteOutlined,
+  ExclamationCircleFilled,
+  MoreOutlined,
+} from "@ant-design/icons";
 import FileIcon from "../../components/common/Icons/FileIcon";
 import FolderIcon from "../../components/common/Icons/FolderIcon";
 import { toast } from "react-toastify";
@@ -28,7 +48,7 @@ const FolderPage: React.FC = () => {
 
   // State cho modal đổi tên
   const [isRenameModalVisible, setRenameModalVisible] = useState(false);
-  const [itemName, setItemName] = useState('');
+  const [itemName, setItemName] = useState("");
   const [processing, setProcessing] = useState(false);
 
   // State để quản lý context menu động
@@ -38,7 +58,7 @@ const FolderPage: React.FC = () => {
     y: number;
     record?: TreeNodeDto;
   }>({ visible: false, x: 0, y: 0 });
-  
+
   const refreshFolder = async () => {
     if (!folderId) return;
     try {
@@ -48,20 +68,20 @@ const FolderPage: React.FC = () => {
       toast.error("Không thể làm mới thư mục.");
     }
   };
-  
+
   const { showCreateModal, CreateNodeModal } = useCreateNode({ onNodeCreated: refreshFolder });
 
   // Đóng context menu khi click ra ngoài
   useEffect(() => {
-     const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent) => {
       // Nếu click vào một menu khác hoặc ra ngoài, đóng menu hiện tại
-      if (!(event.target as HTMLElement).closest('.ant-dropdown')) {
-        setContextMenu(prev => ({ ...prev, visible: false }));
+      if (!(event.target as HTMLElement).closest(".ant-dropdown")) {
+        setContextMenu((prev) => ({ ...prev, visible: false }));
       }
     };
     // Dùng mousedown để bắt sự kiện trước khi menu item được click
-    window.addEventListener('mousedown', handleClickOutside);
-    return () => window.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -78,8 +98,15 @@ const FolderPage: React.FC = () => {
         setCurrentFolder(folderDetails);
         setNodes(folderContent);
         selectNodeId(folderId);
-        showDetails()
-      } catch (error) {
+        showDetails();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          navigate(`/request-access/folder/${folderId}`);
+        } else {
+          toast.error("Không thể tải nội dung thư mục.");
+          navigate("/");
+        }
         console.log(error);
         toast.error("Không thể tải nội dung thư mục hoặc bạn không có quyền truy cập.");
         setCurrentFolder(null);
@@ -89,7 +116,7 @@ const FolderPage: React.FC = () => {
       }
     };
     fetchFolderData();
-  }, [folderId, selectNodeId, showDetails]);
+  }, [folderId, navigate, selectNodeId, showDetails]);
 
   const handleRowClick = (record: TreeNodeDto) => {
     selectNodeId(record.id);
@@ -115,34 +142,35 @@ const FolderPage: React.FC = () => {
     setItemName(record.name);
     setRenameModalVisible(true);
   };
-  
+
   const handleRename = async () => {
-     if (!itemName.trim() || !selectedNodeId) {
+    if (!itemName.trim() || !selectedNodeId) {
       toast.error("Tên không hợp lệ.");
       return;
     }
     setProcessing(true);
     try {
-        await nodeApi.updateNodeName(selectedNodeId, { name: itemName });
-        toast.success("Đổi tên thành công!");
-        setRenameModalVisible(false);
-        await refreshFolder();
+      await nodeApi.updateNodeName(selectedNodeId, { name: itemName });
+      toast.success("Đổi tên thành công!");
+      setRenameModalVisible(false);
+      await refreshFolder();
     } catch {
-        toast.error("Đổi tên thất bại.");
+      toast.error("Đổi tên thất bại.");
     } finally {
-        setProcessing(false);
+      setProcessing(false);
     }
-  }
+  };
 
   const handleDelete = (record: TreeNodeDto) => {
     setContextMenu({ visible: false, x: 0, y: 0 });
     confirm({
       title: `Bạn có chắc chắn muốn xóa "${record.name}"?`,
       icon: <ExclamationCircleFilled />,
-      content: 'Hành động này không thể hoàn tác. Tất cả nội dung bên trong (nếu có) cũng sẽ bị xóa.',
-      okText: 'Xóa',
-      okType: 'danger',
-      cancelText: 'Hủy',
+      content:
+        "Hành động này không thể hoàn tác. Tất cả nội dung bên trong (nếu có) cũng sẽ bị xóa.",
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
       onOk: async () => {
         try {
           await nodeApi.deleteNode(record.id);
@@ -156,15 +184,23 @@ const FolderPage: React.FC = () => {
   };
 
   // --- Định nghĩa các Context Menu ---
-   const emptyAreaMenu = (
+  const emptyAreaMenu = (
     <Menu style={{ minWidth: 180 }}>
-      <Menu.Item key="new-folder"  onClick={() => { showCreateModal({ type: 'FOLDER', parentId: folderId || null }) }}>
-       <Space>
+      <Menu.Item
+        key="new-folder"
+        onClick={() => {
+          showCreateModal({ type: "FOLDER", parentId: folderId || null });
+        }}
+      >
+        <Space>
           <FolderIcon />
           Thư mục mới
         </Space>
       </Menu.Item>
-      <Menu.Item key="new-file"  onClick={() => showCreateModal({ type: 'FILE', parentId: folderId || null })}>
+      <Menu.Item
+        key="new-file"
+        onClick={() => showCreateModal({ type: "FILE", parentId: folderId || null })}
+      >
         <Space>
           <FileIcon />
           Tài liệu mới
@@ -174,15 +210,16 @@ const FolderPage: React.FC = () => {
   );
   // [SỬA] Thêm logic kiểm tra quyền RootAdmin
   const itemMenu = (record: TreeNodeDto) => {
-    const isRootAdmin = user?.role === 'RootAdmin';
-    const canEdit = isRootAdmin || record.userPermission === 'Editor' || record.userPermission === 'Owner';
-    const canDelete = isRootAdmin || record.userPermission === 'Owner';
+    const isRootAdmin = user?.role === "RootAdmin";
+    const canEdit =
+      isRootAdmin || record.userPermission === "Editor" || record.userPermission === "Owner";
+    const canDelete = isRootAdmin || record.userPermission === "Owner";
 
     return (
       <Menu>
-        <Menu.Item 
-          key="rename" 
-          icon={<EditOutlined />} 
+        <Menu.Item
+          key="rename"
+          icon={<EditOutlined />}
           onClick={() => handleShowRenameModal(record)}
           disabled={!canEdit} // Vô hiệu hóa nếu không có quyền
         >
@@ -192,10 +229,10 @@ const FolderPage: React.FC = () => {
           Chia sẻ
         </Menu.Item>
         <Menu.Divider />
-        <Menu.Item 
-          key="delete" 
-          icon={<DeleteOutlined />} 
-          danger 
+        <Menu.Item
+          key="delete"
+          icon={<DeleteOutlined />}
+          danger
           onClick={() => handleDelete(record)}
           disabled={!canDelete} // Vô hiệu hóa nếu không có quyền
         >
@@ -206,9 +243,10 @@ const FolderPage: React.FC = () => {
   };
 
   if (loading) return <Spin size="large" style={{ display: "block", marginTop: 50 }} />;
-  if (!currentFolder) return <Typography.Text type="danger">Không tìm thấy thư mục.</Typography.Text>;
+  if (!currentFolder)
+    return <Typography.Text type="danger">Không tìm thấy thư mục.</Typography.Text>;
 
-  const columns: TableProps<TreeNodeDto>['columns'] = [
+  const columns: TableProps<TreeNodeDto>["columns"] = [
     {
       title: "Tên",
       dataIndex: "name",
@@ -223,10 +261,10 @@ const FolderPage: React.FC = () => {
     { title: "Chủ sở hữu", dataIndex: "createdBy", key: "createdBy", width: 150 },
     { title: "Quyền của bạn", dataIndex: "userPermission", key: "userPermission", width: 150 },
     {
-      title: '',
-      key: 'action',
+      title: "",
+      key: "action",
       width: 60,
-      align: 'right',
+      align: "right",
       render: (_, record) => (
         <Button
           type="text"
@@ -244,10 +282,10 @@ const FolderPage: React.FC = () => {
   ];
 
   return (
-    <div 
-      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+    <div
+      style={{ height: "100%", display: "flex", flexDirection: "column" }}
       onContextMenu={(e) => {
-        if (!(e.target as HTMLElement).closest('.ant-table-row')) {
+        if (!(e.target as HTMLElement).closest(".ant-table-row")) {
           e.preventDefault();
           setContextMenu({ visible: true, x: e.clientX, y: e.clientY, record: undefined });
         }
@@ -256,9 +294,15 @@ const FolderPage: React.FC = () => {
       <div style={{ flexShrink: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Breadcrumb style={{ marginBottom: 16 }}>
-            <Breadcrumb.Item><Link to="/"><HomeOutlined /></Link></Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to="/">
+                <HomeOutlined />
+              </Link>
+            </Breadcrumb.Item>
             {currentFolder.ancestors.map((ancestor) => (
-              <Breadcrumb.Item key={ancestor._id}><Link to={`/drive/${ancestor._id}`}>{ancestor.name}</Link></Breadcrumb.Item>
+              <Breadcrumb.Item key={ancestor._id}>
+                <Link to={`/drive/${ancestor._id}`}>{ancestor.name}</Link>
+              </Breadcrumb.Item>
             ))}
             <Breadcrumb.Item>{currentFolder.name}</Breadcrumb.Item>
           </Breadcrumb>
@@ -268,8 +312,8 @@ const FolderPage: React.FC = () => {
         </div>
         <Title level={2}>{currentFolder.name}</Title>
       </div>
-      
-      <div style={{ flex: 1, minHeight: 0, background: '#fff', borderRadius: 8 }}>
+
+      <div style={{ flex: 1, minHeight: 0, background: "#fff", borderRadius: 8 }}>
         <Table
           columns={columns}
           dataSource={nodes}
@@ -292,18 +336,37 @@ const FolderPage: React.FC = () => {
           locale={{ emptyText: <Empty description="Thư mục này trống." /> }}
         />
       </div>
-      
+
       <Dropdown
         overlay={contextMenu.record ? itemMenu(contextMenu.record) : emptyAreaMenu}
         visible={contextMenu.visible}
       >
-        <div style={{ position: 'fixed', top: contextMenu.y, left: contextMenu.x, width: 1, height: 1 }} />
+        <div
+          style={{
+            position: "fixed",
+            top: contextMenu.y,
+            left: contextMenu.x,
+            width: 1,
+            height: 1,
+          }}
+        />
       </Dropdown>
-      
+
       {CreateNodeModal}
-      
-      <Modal title="Đổi tên" visible={isRenameModalVisible} onOk={handleRename} onCancel={() => setRenameModalVisible(false)} confirmLoading={processing}>
-        <Input placeholder="Nhập tên mới" value={itemName} onChange={(e) => setItemName(e.target.value)} onPressEnter={handleRename} />
+
+      <Modal
+        title="Đổi tên"
+        visible={isRenameModalVisible}
+        onOk={handleRename}
+        onCancel={() => setRenameModalVisible(false)}
+        confirmLoading={processing}
+      >
+        <Input
+          placeholder="Nhập tên mới"
+          value={itemName}
+          onChange={(e) => setItemName(e.target.value)}
+          onPressEnter={handleRename}
+        />
       </Modal>
     </div>
   );

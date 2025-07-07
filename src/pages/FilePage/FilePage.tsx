@@ -1,7 +1,26 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Spin, Typography, message, Card, Breadcrumb, Row, Col, Input, Collapse, Table, Alert, Space } from "antd";
-import { EditOutlined, EyeOutlined, QuestionCircleOutlined, HomeOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import {
+  Spin,
+  Typography,
+  message,
+  Card,
+  Breadcrumb,
+  Row,
+  Col,
+  Input,
+  Collapse,
+  Table,
+  Alert,
+  Space,
+} from "antd";
+import {
+  EditOutlined,
+  EyeOutlined,
+  QuestionCircleOutlined,
+  HomeOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import { nodeApi } from "../../api/node";
 import type { Node, PermissionLevel } from "../../types/app.types";
 import ReactMarkdown from "react-markdown";
@@ -45,6 +64,7 @@ const FilePage: React.FC = () => {
   const { selectNodeId, toggleDetails } = useDriveContext();
 
   const { user } = useAuth();
+  const navigate = useNavigate();
   useEffect(() => {
     const calculateHeight = () => {
       if (pageHeaderRef.current) {
@@ -75,23 +95,28 @@ const FilePage: React.FC = () => {
         setFile(fileData);
         setContent(fileData.content || "");
         setPermission(fileData.userPermission || null); // Lưu quyền vào state
-        selectNodeId (fileId)
+        selectNodeId(fileId);
       })
-      .catch(() => {
+      .catch((error) => {
+        if (error.response?.status === 403) {
+          navigate(`/request-access/file/${fileId}`);
+        } else {
+          message.error("Không thể tải nội dung thư mục.");
+          navigate("/");
+        }
         message.error("Không thể tải nội dung file hoặc bạn không có quyền truy cập.");
         setFile(null);
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [fileId]);
+  }, [fileId, navigate, selectNodeId]);
 
-   const handleInfoClick = () => {
+  const handleInfoClick = () => {
     if (file) {
       toggleDetails();
     }
   };
-
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
@@ -127,7 +152,8 @@ const FilePage: React.FC = () => {
   }
 
   // [MỚI] Xác định xem người dùng có quyền chỉnh sửa không
-  const canEdit = permission === ("Editor" as PermissionLevel) || permission === ("Owner" as PermissionLevel);
+  const canEdit =
+    permission === ("Editor" as PermissionLevel) || permission === ("Owner" as PermissionLevel);
 
   return (
     <div>
@@ -138,7 +164,11 @@ const FilePage: React.FC = () => {
         <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
           <Col>
             <Breadcrumb>
-              <Breadcrumb.Item><Link to="/"><HomeOutlined /></Link></Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link to="/">
+                  <HomeOutlined />
+                </Link>
+              </Breadcrumb.Item>
               {file.ancestors.map((ancestor) => (
                 <Breadcrumb.Item key={ancestor._id}>
                   <Link to={`/drive/${ancestor._id}`}>{ancestor.name}</Link>
@@ -146,7 +176,6 @@ const FilePage: React.FC = () => {
               ))}
               <Breadcrumb.Item>{file.name}</Breadcrumb.Item>
             </Breadcrumb>
-           
           </Col>
           <Col>
             <Space>
@@ -155,36 +184,77 @@ const FilePage: React.FC = () => {
               </span>
 
               {canEdit && isSaving && <Spin size="small" style={{ marginRight: 8 }} />}
-              {canEdit && <Typography.Text type="success">{isSaving ? "Đang lưu..." : "Đã lưu"}</Typography.Text>}
+              {canEdit && (
+                <Typography.Text type="success">
+                  {isSaving ? "Đang lưu..." : "Đã lưu"}
+                </Typography.Text>
+              )}
             </Space>
           </Col>
         </Row>
         <Title level={3}>{file.name}</Title>
         <Collapse ghost style={{ marginBottom: 16 }}>
-          <Panel header={<><QuestionCircleOutlined /> Hướng dẫn cú pháp Markdown</>} key="1" style={{ background: "#fafafa", borderRadius: "8px", border: "1px solid #f0f0f0" }}>
-            <Table dataSource={markdownGuideData} columns={guideColumns} pagination={false} size="small" />
+          <Panel
+            header={
+              <>
+                <QuestionCircleOutlined /> Hướng dẫn cú pháp Markdown
+              </>
+            }
+            key="1"
+            style={{ background: "#fafafa", borderRadius: "8px", border: "1px solid #f0f0f0" }}
+          >
+            <Table
+              dataSource={markdownGuideData}
+              columns={guideColumns}
+              pagination={false}
+              size="small"
+            />
           </Panel>
         </Collapse>
       </div>
 
       {/* [SỬA] Render có điều kiện dựa trên quyền */}
       <Row gutter={16} style={{ height: editorHeight }}>
-        {(canEdit || user?.role === "RootAdmin") ? (
+        {canEdit || user?.role === "RootAdmin" ? (
           <>
             <Col span={12} style={{ height: "100%" }}>
-              <Card title={<><EditOutlined /> Trình soạn thảo</>} style={{ height: "100%", display: "flex", flexDirection: "column" }} bodyStyle={{ flex: 1, overflowY: "auto", padding: 0 }}>
+              <Card
+                title={
+                  <>
+                    <EditOutlined /> Trình soạn thảo
+                  </>
+                }
+                style={{ height: "100%", display: "flex", flexDirection: "column" }}
+                bodyStyle={{ flex: 1, overflowY: "auto", padding: 0 }}
+              >
                 <TextArea
                   value={content}
                   onChange={handleContentChange}
                   placeholder="Nhập nội dung Markdown ở đây..."
-                  style={{ border: "none", resize: "none", padding: "12px", boxShadow: "none", height: "100%" }}
+                  style={{
+                    border: "none",
+                    resize: "none",
+                    padding: "12px",
+                    boxShadow: "none",
+                    height: "100%",
+                  }}
                 />
               </Card>
             </Col>
             <Col span={12} style={{ height: "100%" }}>
-              <Card title={<><EyeOutlined /> Xem trước</>} style={{ height: "100%", display: "flex", flexDirection: "column" }} bodyStyle={{ flex: 1, overflowY: "auto" }}>
+              <Card
+                title={
+                  <>
+                    <EyeOutlined /> Xem trước
+                  </>
+                }
+                style={{ height: "100%", display: "flex", flexDirection: "column" }}
+                bodyStyle={{ flex: 1, overflowY: "auto" }}
+              >
                 <div className="markdown-body">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{content}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                    {content}
+                  </ReactMarkdown>
                 </div>
               </Card>
             </Col>
@@ -192,16 +262,30 @@ const FilePage: React.FC = () => {
         ) : (
           // Nếu chỉ có quyền xem, hiển thị phần xem trước chiếm toàn bộ chiều rộng
           <Col span={24} style={{ height: "100%" }}>
-             <Alert
-                message="Chế độ chỉ xem"
-                description="Bạn chỉ có quyền xem tài liệu này. Để chỉnh sửa, hãy yêu cầu quyền Editor từ chủ sở hữu."
-                type="info"
-                showIcon
-                style={{ marginBottom: 16 }}
-              />
-            <Card title={<><EyeOutlined /> Nội dung tài liệu</>} style={{ height: `calc(${editorHeight} - 70px)`, display: "flex", flexDirection: "column" }} bodyStyle={{ flex: 1, overflowY: "auto" }}>
+            <Alert
+              message="Chế độ chỉ xem"
+              description="Bạn chỉ có quyền xem tài liệu này. Để chỉnh sửa, hãy yêu cầu quyền Editor từ chủ sở hữu."
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
+            <Card
+              title={
+                <>
+                  <EyeOutlined /> Nội dung tài liệu
+                </>
+              }
+              style={{
+                height: `calc(${editorHeight} - 70px)`,
+                display: "flex",
+                flexDirection: "column",
+              }}
+              bodyStyle={{ flex: 1, overflowY: "auto" }}
+            >
               <div className="markdown-body">
-                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{content}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                  {content}
+                </ReactMarkdown>
               </div>
             </Card>
           </Col>

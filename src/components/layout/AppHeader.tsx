@@ -1,19 +1,19 @@
 import React from "react";
-import { Input, Avatar, Dropdown, Menu } from "antd";
-import { FolderOpenOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { Avatar, Dropdown, Menu } from "antd";
+import { LogoutOutlined, UserOutlined, FolderOpenOutlined } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
+import SearchInput from "./SearchInput"; // 1. Import component SearchInput mới
 
 const AppHeader: React.FC = () => {
   const { user, logout } = useAuth();
 
   const menu = (
     <Menu style={{ minWidth: 140 }}>
+      <Menu.Item key="profile" icon={<UserOutlined />}>
+        Hồ sơ
+      </Menu.Item>
       <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={logout}>
         Đăng xuất
-      </Menu.Item>
-
-      <Menu.Item key="profile" icon={<UserOutlined />} onClick={() => alert("hihi")}>
-        Profile
       </Menu.Item>
     </Menu>
   );
@@ -62,21 +62,8 @@ const AppHeader: React.FC = () => {
           height: "100%",
         }}
       >
-        <Input
-          placeholder="Tìm trong tài liệu..."
-          style={{
-            borderRadius: 24,
-            background: "#f5f6fa",
-            border: "none",
-            fontSize: 16,
-            paddingLeft: 20,
-            height: 40,
-            minWidth: 340,
-            maxWidth: 600,
-            width: "100%",
-          }}
-          allowClear
-        />
+        {/* 2. Thay thế Input cũ bằng SearchInput mới */}
+        <SearchInput />
       </div>
       <div
         style={{
