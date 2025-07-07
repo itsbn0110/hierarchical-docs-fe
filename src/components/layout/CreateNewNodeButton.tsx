@@ -103,6 +103,7 @@ const CreateNewButton: React.FC<CreateNewButtonProps> = ({ onNodeCreated }) => {
       >
         <Input
           placeholder="Nhập tên"
+          style={{padding : 8}}
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
           onPressEnter={handleCreate}

@@ -62,6 +62,7 @@ export const useCreateNode = ({ onNodeCreated }: UseCreateNodeProps) => {
       destroyOnClose
     >
       <Input
+        style={{ padding: 8 }}
         placeholder="Nhập tên"
         value={itemName}
         onChange={(e) => setItemName(e.target.value)}

@@ -46,7 +46,6 @@ api.interceptors.response.use(
       else if (status === 401) {
         message.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
         localStorage.removeItem("accessToken")
-
         window.location.href = '/login';
       }
       // Các trường hợp lỗi khác có thể được xử lý ở đây
