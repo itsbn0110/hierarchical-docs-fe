@@ -1,7 +1,7 @@
-import  { useState } from 'react';
-import { Modal, Input, message } from 'antd';
-import { nodeApi } from '../api/node';
-import type { CreateNodeDto } from '../types/node.types';
+import { useState } from "react";
+import { Modal, Input, message } from "antd";
+import { nodeApi } from "../api/node";
+import type { CreateNodeDto } from "../types/node.types";
 
 // Định nghĩa các props mà hook cần
 interface UseCreateNodeProps {
@@ -10,27 +10,27 @@ interface UseCreateNodeProps {
 
 // Định nghĩa các props cần thiết khi muốn hiển thị modal
 interface ShowModalProps {
-  type: 'FOLDER' | 'FILE';
+  type: "FOLDER" | "FILE";
   parentId: string | null;
 }
 
 export const useCreateNode = ({ onNodeCreated }: UseCreateNodeProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [itemName, setItemName] = useState('');
-  const [modalProps, setModalProps] = useState<ShowModalProps>({ type: 'FOLDER', parentId: null });
+  const [itemName, setItemName] = useState("");
+  const [modalProps, setModalProps] = useState<ShowModalProps>({ type: "FOLDER", parentId: null });
   const [processing, setProcessing] = useState(false);
 
   // Hàm để các component bên ngoài gọi để kích hoạt modal
   const showCreateModal = (props: ShowModalProps) => {
     setModalProps(props);
-    setItemName(''); // Reset tên mỗi khi mở
+    setItemName(""); // Reset tên mỗi khi mở
     setIsModalVisible(true);
   };
 
   // Logic tạo node, giờ đã được đóng gói trong hook
   const handleCreate = async () => {
     if (!itemName.trim()) {
-      message.error('Tên không được để trống.');
+      message.error("Tên không được để trống.");
       return;
     }
     setProcessing(true);
@@ -41,11 +41,11 @@ export const useCreateNode = ({ onNodeCreated }: UseCreateNodeProps) => {
     };
     try {
       await nodeApi.createNode(dto);
-      message.success(`Đã tạo ${modalProps.type === 'FOLDER' ? 'thư mục' : 'file'} thành công!`);
+      message.success(`Đã tạo ${modalProps.type === "FOLDER" ? "thư mục" : "file"} thành công!`);
       setIsModalVisible(false);
       onNodeCreated(modalProps.parentId); // Gọi callback để component cha làm mới
     } catch {
-      message.error('Tạo mới thất bại.');
+      message.error("Tạo mới thất bại.");
     } finally {
       setProcessing(false);
     }
@@ -54,7 +54,7 @@ export const useCreateNode = ({ onNodeCreated }: UseCreateNodeProps) => {
   // Component Modal được trả về như một phần của hook
   const CreateNodeModal = (
     <Modal
-      title={`Tạo ${modalProps.type === 'FOLDER' ? 'thư mục' : 'file'} mới`}
+      title={`Tạo ${modalProps.type === "FOLDER" ? "thư mục" : "file"} mới`}
       visible={isModalVisible}
       onOk={handleCreate}
       onCancel={() => setIsModalVisible(false)}
@@ -62,7 +62,6 @@ export const useCreateNode = ({ onNodeCreated }: UseCreateNodeProps) => {
       destroyOnClose
     >
       <Input
-        style={{ padding: 8 }}
         placeholder="Nhập tên"
         value={itemName}
         onChange={(e) => setItemName(e.target.value)}
@@ -72,5 +71,5 @@ export const useCreateNode = ({ onNodeCreated }: UseCreateNodeProps) => {
   );
 
   // Hook trả về hàm để kích hoạt và component Modal để hiển thị
-  return { showCreateModal, CreateNodeModal,setIsModalVisible };
+  return { showCreateModal, CreateNodeModal, setIsModalVisible };
 };

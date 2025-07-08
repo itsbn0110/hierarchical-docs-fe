@@ -164,6 +164,7 @@ const SearchInput: React.FC = () => {
             background: "transparent",
             fontSize: 16,
             flex: 1,
+            padding: 0,
             marginLeft: 8,
           }}
         />

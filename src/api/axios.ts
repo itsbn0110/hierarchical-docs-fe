@@ -28,7 +28,7 @@ api.interceptors.response.use(
       const { data, status } = error.response;
 
       // Trường hợp 1: Lỗi yêu cầu đổi mật khẩu (E1009)
-      if (status === 403 && data.errorCode === 'E1009' ) {
+      if (status === 403 && data.errorCode === 'E1010' ) {
         Modal.warning({
           title: 'Yêu cầu Cập nhật Mật khẩu',
           content: 'Để đảm bảo an toàn cho tài khoản, bạn phải đổi mật khẩu trước khi có thể thực hiện các hành động khác.',

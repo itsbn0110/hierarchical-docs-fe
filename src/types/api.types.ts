@@ -1,4 +1,4 @@
-// Các kiểu dữ liệu mapping với DTO/response backend
+import type { PermissionLevel } from "./app.types";
 
 import type { User } from "./app.types";
 
@@ -41,7 +41,5 @@ export interface CreateAccessRequestDto {
   message?: string;
 }
 
-
-export type RequestStatus = 'PENDING' | 'APPROVED' | 'DENIED';
-export type PermissionLevel = 'Owner' | 'Editor' | 'Viewer';
-export type NodeType = 'FOLDER' | 'FILE';
+export type RequestStatus = "PENDING" | "APPROVED" | "DENIED";
+export type NodeType = "FOLDER" | "FILE";
