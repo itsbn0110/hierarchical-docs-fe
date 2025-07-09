@@ -3,7 +3,7 @@ import { useAuthContext } from "../../hooks/useAuthContext";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input, Button, Tabs, Typography, Form } from "antd";
-import { login } from "../../api/auth";
+import { authApi } from "../../api";
 import styles from "./LoginPage.module.scss";
 import classNames from "classnames/bind";
 
@@ -20,7 +20,7 @@ const LoginPage: React.FC = () => {
     setError("");
     try {
       // Gọi API login chuẩn qua api/auth
-      const res = await login(values);
+      const res = await authApi.login(values);
       setUser(res.user);
       setAccessToken(res.accessToken);
       localStorage.setItem("accessToken", res.accessToken);

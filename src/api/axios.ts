@@ -1,12 +1,15 @@
 import axios from "axios";
-import { Modal, message } from 'antd';
+import { Modal, message } from "antd";
+import { authApi } from "./auth.api";
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8086",
   withCredentials: true,
+  timeout: 1000 * 60 * 10,
 });
 
+let refreshTokenPromise: Promise<string> | null = null;
 
-// Thêm interceptor để tự động gắn access token vào header Authorization
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   if (token) {
@@ -16,43 +19,61 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// TODO: Thêm interceptor để tự động refresh token khi hết hạn
 api.interceptors.response.use(
-  (response) => {
-    // Trả về response nếu không có lỗi
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // Xử lý lỗi ở đây
     if (error.response) {
       const { data, status } = error.response;
+      const originalRequests = error.config;
 
-      // Trường hợp 1: Lỗi yêu cầu đổi mật khẩu (E1009)
-      if (status === 403 && data.errorCode === 'E1010' ) {
+      if (status === 410 && !originalRequests._retry) {
+        originalRequests._retry = true;
+        if (!refreshTokenPromise) {
+          refreshTokenPromise = authApi
+            .refreshTokenAPI()
+            .then((response) => {
+              const accessToken = response.accessToken;
+              const refreshToken = response.refreshToken;
+              localStorage.setItem("accessToken", accessToken);
+              localStorage.setItem("refreshToken", refreshToken);
+              return accessToken;
+            })
+            .catch((err) => {
+              message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+              localStorage.removeItem("accessToken");
+              window.location.href = "/login";
+              return Promise.reject(err);
+            })
+            .finally(() => {
+              refreshTokenPromise = null;
+            });
+        }
+        return refreshTokenPromise.then((newToken) => {
+          originalRequests.headers["Authorization"] = `Bearer ${newToken}`;
+          return api(originalRequests);
+        });
+      }
+
+      if (status === 403 && data.errorCode === "E1010") {
         Modal.warning({
-          title: 'Yêu cầu Cập nhật Mật khẩu',
-          content: 'Để đảm bảo an toàn cho tài khoản, bạn phải đổi mật khẩu trước khi có thể thực hiện các hành động khác.',
-          okText: 'Đến trang đổi mật khẩu',
-          keyboard: false, // Không cho đóng bằng phím Esc
-          maskClosable: false, // Không cho đóng khi click ra ngoài
+          title: "Yêu cầu Cập nhật Mật khẩu",
+          content:
+            "Để đảm bảo an toàn cho tài khoản, bạn phải đổi mật khẩu trước khi có thể thực hiện các hành động khác.",
+          okText: "Đến trang đổi mật khẩu",
+          keyboard: false,
+          maskClosable: false,
           onOk: () => {
-            // Chuyển hướng người dùng. Dùng window.location.href để đảm bảo chuyển trang
-            // vì interceptor nằm ngoài context của React Router.
-            window.location.href = '/change-password'; // Hoặc một route khác của bạn
+            window.location.href = "/change-password";
           },
         });
-      } 
-      // Trường hợp 2: Token hết hạn hoặc không hợp lệ (thường là 401)
-      else if (status === 401) {
-        message.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-        localStorage.removeItem("accessToken")
-        window.location.href = '/login';
+      } else if (status === 401) {
+        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        localStorage.removeItem("accessToken");
+        window.location.href = "/login";
       }
-      // Các trường hợp lỗi khác có thể được xử lý ở đây
     }
-
-    // Rất quan trọng: Trả về lỗi để các hàm .catch() ở nơi gọi API có thể xử lý tiếp
     return Promise.reject(error);
   }
 );
+
 export default api;

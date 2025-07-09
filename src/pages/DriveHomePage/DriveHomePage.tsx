@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Spin, Table, Typography, message, Empty } from "antd";
-import { nodeApi } from "../../api/node";
+import { nodeApi } from "../../api";
 import type { TreeNodeDto } from "../../types/node.types";
 import FolderIcon from "../../components/common/Icons/FolderIcon";
 

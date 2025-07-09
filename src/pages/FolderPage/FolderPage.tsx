@@ -14,7 +14,7 @@ import {
   Space,
 } from "antd";
 import type { TableProps } from "antd";
-import { nodeApi } from "../../api/node";
+import { nodeApi } from "../../api";
 import { useDriveContext } from "../../hooks/useDriveContext";
 import { useCreateNode } from "../../hooks/useCreateNode";
 import type { Node as DriveNode } from "../../types/app.types";

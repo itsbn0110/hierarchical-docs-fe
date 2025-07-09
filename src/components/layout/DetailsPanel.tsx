@@ -16,10 +16,14 @@ import { useDriveContext } from "../../hooks/useDriveContext";
 import FileIcon from "../common/Icons/FileIcon";
 import FolderIcon from "../common/Icons/FolderIcon";
 import { ClockCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
-import { permissionsApi, type UserPermission } from "../../api/permission";
+import {
+  permissionsApi,
+  nodeApi,
+  activityLogApi,
+  type UserPermission,
+  type ActivityLog,
+} from "../../api";
 import type { PermissionLevel } from "../../types/app.types";
-import { activityLogApi, type ActivityLog } from "../../api/activityLog";
-import { nodeApi } from "../../api/node";
 import type { Node as DriveNode } from "../../types/app.types";
 import ManageAccessModal from "./ManageAccessModal";
 
@@ -121,7 +125,7 @@ const DetailsPanel: React.FC = () => {
     Promise.all([
       nodeApi.getNodeById(selectedNodeId),
       permissionsApi.getPermissionsForNode(selectedNodeId),
-      activityLogApi.getActivityForNode(selectedNodeId),
+      activityLogApi.getForNode(selectedNodeId),
     ])
       .then(([nodeData, perms, logs]) => {
         setNodeDetails(nodeData);

@@ -1,4 +1,3 @@
-// Các kiểu dữ liệu liên quan đến Auth
 import type { User } from "./app.types";
 
 export interface LoginPayload {
@@ -7,10 +6,10 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
+  data: unknown;
   user: User;
   accessToken: string;
   refreshToken: string;
 }
 
-
-export type UserRole = 'RootAdmin' | 'User';
+export type UserRole = "RootAdmin" | "User";

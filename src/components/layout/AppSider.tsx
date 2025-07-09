@@ -14,7 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
-import { nodeApi } from "../../api/node";
+import { nodeApi } from "../../api";
 import { accessRequestApi } from "../../api/accessRequest.api"; // Import API mới
 import type { TreeNodeDto } from "../../types/node.types";
 import classNames from "classnames";

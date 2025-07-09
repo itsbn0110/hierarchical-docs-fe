@@ -21,7 +21,7 @@ import {
   HomeOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
-import { nodeApi } from "../../api/node";
+import { nodeApi } from "../../api";
 import type { Node, PermissionLevel } from "../../types/app.types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";

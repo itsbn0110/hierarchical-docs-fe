@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Modal, Input, message } from "antd";
-import { nodeApi } from "../api/node";
+import { nodeApi } from "../api";
 import type { CreateNodeDto } from "../types/node.types";
 
 // Định nghĩa các props mà hook cần

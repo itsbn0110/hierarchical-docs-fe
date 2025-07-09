@@ -14,7 +14,7 @@ import {
 } from "antd";
 import { UserAddOutlined, DeleteOutlined } from "@ant-design/icons";
 import { type Node as DriveNode } from "../../types/app.types";
-import { permissionsApi, type UserPermission } from "../../api/permission";
+import { permissionsApi, type UserPermission } from "../../api";
 import type { PermissionLevel } from "../../types/app.types";
 import { useAuth } from "../../hooks/useAuth";
 
