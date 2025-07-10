@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, Input, message } from "antd";
 import { nodeApi } from "../api";
 import type { CreateNodeDto } from "../types/node.types";
+import { ErrorMessages } from "../constants/messages";
 
 // Định nghĩa các props mà hook cần
 interface UseCreateNodeProps {
@@ -30,7 +31,7 @@ export const useCreateNode = ({ onNodeCreated }: UseCreateNodeProps) => {
   // Logic tạo node, giờ đã được đóng gói trong hook
   const handleCreate = async () => {
     if (!itemName.trim()) {
-      message.error("Tên không được để trống.");
+      message.error(ErrorMessages.NODE_NAME_REQUIRED);
       return;
     }
     setProcessing(true);
@@ -45,7 +46,7 @@ export const useCreateNode = ({ onNodeCreated }: UseCreateNodeProps) => {
       setIsModalVisible(false);
       onNodeCreated(modalProps.parentId); // Gọi callback để component cha làm mới
     } catch {
-      message.error("Tạo mới thất bại.");
+      message.error(ErrorMessages.CREATE_NODE_FAILED);
     } finally {
       setProcessing(false);
     }

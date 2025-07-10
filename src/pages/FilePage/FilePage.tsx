@@ -28,6 +28,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { useAuth } from "../../hooks/useAuth";
 import { useDriveContext } from "../../hooks/useDriveContext";
+import { ErrorMessages } from "../../constants/messages";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -101,10 +102,10 @@ const FilePage: React.FC = () => {
         if (error.response?.status === 403) {
           navigate(`/request-access/file/${fileId}`);
         } else {
-          message.error("Không thể tải nội dung thư mục.");
+          message.error(ErrorMessages.LOAD_FOLDER_FAILED);
           navigate("/");
         }
-        message.error("Không thể tải nội dung file hoặc bạn không có quyền truy cập.");
+        message.error(ErrorMessages.LOAD_FILE_FAILED);
         setFile(null);
       })
       .finally(() => {
@@ -137,7 +138,7 @@ const FilePage: React.FC = () => {
       await nodeApi.updateNodeContent(fileId, { content: saveContent });
     } catch (error) {
       console.log(error);
-      message.error("Lưu thất bại.");
+      message.error(ErrorMessages.SAVE_FAILED);
     } finally {
       setIsSaving(false);
     }

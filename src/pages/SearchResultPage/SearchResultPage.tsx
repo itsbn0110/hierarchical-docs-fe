@@ -5,6 +5,7 @@ import { searchApi } from "../../api/search.api";
 import type { SearchResultDto } from "../../types/app.types";
 import FileIcon from "../../components/common/Icons/FileIcon";
 import FolderIcon from "../../components/common/Icons/FolderIcon";
+import { ErrorMessages } from "../../constants/messages";
 
 const { Title, Text } = Typography;
 
@@ -22,7 +23,7 @@ const SearchResultsPage: React.FC = () => {
       searchApi
         .fullSearch(query)
         .then((data) => setResults(data))
-        .catch(() => message.error("Tìm kiếm thất bại."))
+        .catch(() => message.error(ErrorMessages.SEARCH_FAILED))
         .finally(() => setLoading(false));
     } else {
       setResults([]);

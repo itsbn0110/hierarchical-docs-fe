@@ -1,5 +1,5 @@
 import api from "./axios";
-import type { CreateAccessRequestDto, PermissionLevel } from "../types/app.types";
+import type { CreateAccessRequestDto, PermissionLevel, RequestStatus } from "../types/app.types";
 
 // [SỬA] Bổ sung đầy đủ các trường cho PendingRequest để khớp với dữ liệu API trả về
 export interface PendingRequest {
@@ -17,6 +17,17 @@ export interface PendingRequest {
   message?: string;
   createdAt: string;
 }
+
+
+export interface ProcessedRequest extends Omit<PendingRequest, 'message'> {
+    status: RequestStatus;
+    reviewedAt: string;
+    reviewer: {
+        _id: string;
+        username: string;
+    };
+}
+
 
 /**
  * Gửi yêu cầu xin quyền truy cập cho một node.
@@ -54,9 +65,15 @@ const deny = async (requestId: string) => {
   return res.data;
 };
 
+
+const getProcessedRequests = async (): Promise<ProcessedRequest[]> => {
+    const res = await api.get("/access-requests/processed");
+    return res.data;
+}
 export const accessRequestApi = {
   create,
   getPendingRequests,
+  getProcessedRequests,
   approve,
   deny,
 };

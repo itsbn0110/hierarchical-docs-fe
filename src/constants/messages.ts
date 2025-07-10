@@ -48,6 +48,25 @@ export const ErrorMessages = {
   VALIDATION_ERROR: "Lỗi xác thực dữ liệu",
   ROOTADMIN_ISNOT_DEFINED:
     "ROOT_ADMIN_EMAIL, ROOT_ADMIN_USERNAME, hoặc ROOT_ADMIN_PASSWORD không được định nghĩa trong biến môi trường",
+  NODE_NAME_REQUIRED: "Tên không được để trống.",
+  CREATE_NODE_FAILED: "Tạo mới thất bại. Bạn có thể không có quyền trong thư mục này.",
+  LOAD_FOLDER_FAILED: "Không thể tải nội dung thư mục.",
+  LOAD_FILE_FAILED: "Không thể tải nội dung file hoặc bạn không có quyền truy cập.",
+  SAVE_FAILED: "Lưu thất bại.",
+  SEARCH_FAILED: "Tìm kiếm thất bại.",
+  RESOURCE_UNDEFINED: "Không thể xác định được tài nguyên cần yêu cầu.",
+  SEND_REQUEST_FAILED: "Gửi yêu cầu thất bại.",
+  LOAD_DRIVE_FAILED: "Không thể tải dữ liệu từ Drive của bạn.",
+  LOAD_REQUEST_LIST_FAILED: "Không thể tải danh sách yêu cầu.",
+  APPROVE_REQUEST_FAILED: "Chấp thuận yêu cầu thất bại.",
+  DENY_REQUEST_FAILED: "Từ chối yêu cầu thất bại.",
+  LOAD_FOLDER_CONTENT_FAILED: "Không thể tải nội dung của thư mục.",
+  REFRESH_TREE_FAILED: "Không thể làm mới cây thư mục.",
+  LOAD_PERMISSIONS_FAILED: "Không thể tải danh sách quyền.",
+  UPDATE_PERMISSION_FAILED: "Cập nhật quyền thất bại.",
+  REVOKE_PERMISSION_FAILED: "Thu hồi quyền thất bại. Có thể bạn đang cố xóa Owner cuối cùng.",
+  INVITE_FAILED: "Mời thất bại. Người dùng không tồn tại hoặc đã có quyền.",
+  LOAD_DETAIL_FAILED: "Không thể tải chi tiết cho mục này.",
 } as const;
 
 export const SuccessMessages = {

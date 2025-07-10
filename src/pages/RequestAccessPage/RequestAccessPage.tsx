@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button, Input, Typography, Card, Avatar, message, Divider, Radio, Space } from "antd";
 import { useAuth } from "../../hooks/useAuth";
 import { accessRequestApi } from "../../api/accessRequest.api";
+import { ErrorMessages } from "../../constants/messages";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -19,7 +20,7 @@ const RequestAccessPage: React.FC = () => {
 
   const handleRequestAccess = async () => {
     if (!nodeId) {
-      message.error("Không thể xác định được tài nguyên cần yêu cầu.");
+      message.error(ErrorMessages.RESOURCE_UNDEFINED);
       return;
     }
     setSubmitting(true);
@@ -38,7 +39,7 @@ const RequestAccessPage: React.FC = () => {
         message.warning("Bạn đã gửi yêu cầu truy cập cho mục này trước đó.");
         setRequestSent(true);
       } else {
-        message.error("Gửi yêu cầu thất bại.");
+        message.error(ErrorMessages.SEND_REQUEST_FAILED);
       }
     } finally {
       setSubmitting(false);

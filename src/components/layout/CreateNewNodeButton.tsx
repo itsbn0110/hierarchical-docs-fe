@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Button, Dropdown, Menu, Modal, Input, message, Space } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { nodeApi } from "../../api/node";
+import { nodeApi } from "../../api";
 import type { CreateNodeDto } from "../../types/node.types";
 import FolderIcon from "../common/Icons/FolderIcon";
 import FileIcon from "../common/Icons/FileIcon";
+import { ErrorMessages } from "../../constants/messages"; // Import ErrorMessages
 
 interface CreateNewButtonProps {
   onNodeCreated: (parentId: string | null) => void;
@@ -24,7 +25,7 @@ const CreateNewButton: React.FC<CreateNewButtonProps> = ({ onNodeCreated }) => {
 
   const handleCreate = async () => {
     if (!newItemName.trim()) {
-      message.error("Tên không được để trống.");
+      message.error(ErrorMessages.NODE_NAME_REQUIRED);
       return;
     }
 
@@ -49,7 +50,7 @@ const CreateNewButton: React.FC<CreateNewButtonProps> = ({ onNodeCreated }) => {
       onNodeCreated(parentId);
     } catch (error) {
       console.log(error);
-      message.error("Tạo mới thất bại. Bạn có thể không có quyền trong thư mục này.");
+      message.error(ErrorMessages.CREATE_NODE_FAILED);
     } finally {
       setIsCreating(false);
     }

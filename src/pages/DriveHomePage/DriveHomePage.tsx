@@ -4,6 +4,7 @@ import { Spin, Table, Typography, message, Empty } from "antd";
 import { nodeApi } from "../../api";
 import type { TreeNodeDto } from "../../types/node.types";
 import FolderIcon from "../../components/common/Icons/FolderIcon";
+import { ErrorMessages } from "../../constants/messages";
 
 const { Title } = Typography;
 
@@ -21,7 +22,7 @@ const DriveHomePage: React.FC = () => {
         console.log("content:", content); // Kiểm tra dữ liệu trả về
         setRootNodes(content);
       } catch (error) {
-        message.error("Không thể tải dữ liệu từ Drive của bạn.");
+        message.error(ErrorMessages.LOAD_DRIVE_FAILED);
         console.error(error);
       } finally {
         setLoading(false);

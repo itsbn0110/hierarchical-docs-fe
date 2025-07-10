@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Divider, Tree, Spin, message, Badge } from "antd"; // Thêm Badge
+import { Divider, Tree, Spin, message, Badge } from "antd";
 import type { DataNode, TreeProps } from "antd/es/tree";
 import {
   FolderOpenOutlined,
@@ -10,17 +10,18 @@ import {
   DeleteOutlined,
   CaretDownOutlined,
   CaretRightOutlined,
-  MailOutlined, // Thêm icon mới
+  MailOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { nodeApi } from "../../api";
-import { accessRequestApi } from "../../api/accessRequest.api"; // Import API mới
+import { accessRequestApi } from "../../api/accessRequest.api";
 import type { TreeNodeDto } from "../../types/node.types";
 import classNames from "classnames";
 import CreateNewButton from "./CreateNewNodeButton";
 import FileIcon from "../common/Icons/FileIcon";
 import FolderIcon from "../common/Icons/FolderIcon";
+import { ErrorMessages } from "../../constants/messages";
 
 interface CustomDataNode extends DataNode {
   type: "FOLDER" | "FILE";
@@ -78,11 +79,8 @@ const AppSider: React.FC = () => {
   const [selectedKey, setSelectedKey] = useState<string>("my-drive");
   const [isDriveOpen, setIsDriveOpen] = useState(true);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-
-  // [MỚI] State để lưu số lượng yêu cầu đang chờ
   const [pendingRequestCount, setPendingRequestCount] = useState(0);
 
-  // [MỚI] useEffect để lấy số lượng yêu cầu
   useEffect(() => {
     accessRequestApi
       .getPendingRequests()
@@ -92,7 +90,7 @@ const AppSider: React.FC = () => {
       .catch((err) => {
         console.error("Không thể lấy danh sách yêu cầu:", err);
       });
-  }, []); // Chỉ chạy một lần khi component được mount
+  }, []);
 
   useEffect(() => {
     const pathParts = location.pathname.split("/");
@@ -102,7 +100,7 @@ const AppSider: React.FC = () => {
       const currentId = pathParts[pathParts.length - 1];
       setSelectedKey(currentId);
     } else {
-      const activeItem = [...mainMenuItems, ...adminMenuItems].find(
+      const activeItem = [...mainMenuItems, ...adminMenuItems, { key: 'access-requests', path: '/access-requests' }].find(
         (item) => item.path === location.pathname
       );
       if (activeItem) {
@@ -138,7 +136,7 @@ const AppSider: React.FC = () => {
           resolve();
         })
         .catch(() => {
-          message.error(`Không thể tải nội dung của thư mục "${node.title}".`);
+          message.error(ErrorMessages.LOAD_FOLDER_CONTENT_FAILED);
           resolve();
         });
     });
@@ -158,7 +156,7 @@ const AppSider: React.FC = () => {
         }
       }
     } catch {
-      message.error("Không thể làm mới cây thư mục.");
+      message.error(ErrorMessages.REFRESH_TREE_FAILED);
     }
   };
 
@@ -230,7 +228,6 @@ const AppSider: React.FC = () => {
     location.pathname.startsWith("/drive/") ||
     location.pathname.startsWith("/file/");
 
-  // [MỚI] Tạo item động cho yêu cầu truy cập
   const accessRequestItem = {
     key: "access-requests",
     label: "Yêu cầu truy cập",
@@ -308,9 +305,9 @@ const AppSider: React.FC = () => {
               )}
             </div>
           )}
-
-          {/* [SỬA] Hiển thị item mới nếu có yêu cầu */}
-          {pendingRequestCount > 0 && renderStaticItem(accessRequestItem)}
+          
+          {/* SỬA LỖI Ở ĐÂY: Loại bỏ điều kiện, luôn render item */}
+          {renderStaticItem(accessRequestItem)}
           {mainMenuItems.map(renderStaticItem)}
 
           <Divider style={{ margin: "18px 0 12px 0" }} />

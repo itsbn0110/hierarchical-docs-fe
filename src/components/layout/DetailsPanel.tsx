@@ -28,6 +28,7 @@ import type { Node as DriveNode } from "../../types/app.types";
 import ManageAccessModal from "./ManageAccessModal";
 
 import { useAuth } from "../../hooks/useAuth";
+import { ErrorMessages } from "../../constants/messages";
 
 const { TabPane } = Tabs;
 const { Text, Title, Paragraph } = Typography;
@@ -137,7 +138,7 @@ const DetailsPanel: React.FC = () => {
         setCurrentUserPermission(myPermission ? myPermission.permission : null);
       })
       .catch(() => {
-        message.error("Không thể tải chi tiết cho mục này.");
+        message.error(ErrorMessages.LOAD_DETAIL_FAILED);
         setNodeDetails(null);
       })
       .finally(() => {

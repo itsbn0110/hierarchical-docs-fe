@@ -17,6 +17,7 @@ import { type Node as DriveNode } from "../../types/app.types";
 import { permissionsApi, type UserPermission } from "../../api";
 import type { PermissionLevel } from "../../types/app.types";
 import { useAuth } from "../../hooks/useAuth";
+import { ErrorMessages } from "../../constants/messages";
 
 const { Text } = Typography;
 
@@ -51,7 +52,7 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
       setPermissions(perms);
     } catch (error) {
       console.log(error);
-      message.error("Không thể tải danh sách quyền.");
+      message.error(ErrorMessages.LOAD_PERMISSIONS_FAILED);
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
       await fetchPermissions();
     } catch (error) {
       console.log(error);
-      message.error("Cập nhật quyền thất bại.");
+      message.error(ErrorMessages.UPDATE_PERMISSION_FAILED);
     }
   };
 
@@ -81,7 +82,7 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
       await fetchPermissions();
     } catch (error) {
       console.log(error);
-      message.error("Thu hồi quyền thất bại. Có thể bạn đang cố xóa Owner cuối cùng.");
+      message.error(ErrorMessages.REVOKE_PERMISSION_FAILED);
     }
   };
 
@@ -101,7 +102,7 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
       await fetchPermissions();
     } catch (error) {
       console.log(error);
-      message.error("Mời thất bại. Người dùng không tồn tại hoặc đã có quyền.");
+      message.error(ErrorMessages.INVITE_FAILED);
     }
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Space, Modal, Form, Input, Select, Tag } from "antd";
-import { getUsers, getUserById, createUser, updateUser, deleteUser } from "../../api/user";
+import { userApi } from "../../api";
 import type { User } from "../../types/app.types";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,7 +18,7 @@ const UserManagementPage: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    getUsers()
+    userApi.getUsers()
       .then((data) => setUsers(data))
       .catch((err) => toast.error(getErrorMessage(err)))
       .finally(() => setLoading(false));
@@ -26,7 +26,7 @@ const UserManagementPage: React.FC = () => {
 
   const deleteUserHandler = async (id: string) => {
     try {
-      await deleteUser(id);
+      await  userApi.deleteUser(id);
       setUsers((prev) => prev.filter((user) => user._id !== id));
       toast.success(SuccessMessages.USER_UPDATED);
     } catch (error) {
@@ -45,7 +45,7 @@ const UserManagementPage: React.FC = () => {
     setEditUser(user);
     setModalOpen(true);
     try {
-      const userDetail = await getUserById(user._id);
+      const userDetail = await userApi.getUserById(user._id);
       form.setFieldsValue({
         ...userDetail,
         isActive: [true, "true", 1, "1"].includes(userDetail.isActive),
@@ -74,15 +74,15 @@ const UserManagementPage: React.FC = () => {
       if (editUser) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { email: _, ...updateValues } = values;
-        await updateUser(editUser._id, updateValues);
+        await userApi.updateUser(editUser._id, updateValues);
         setUsers((prev) =>
           prev.map((u) => (u._id === editUser._id ? { ...u, ...updateValues } : u))
         );
         toast.success(SuccessMessages.USER_UPDATED);
       } else {
-        await createUser(values);
+        await userApi.createUser(values);
         setLoading(true);
-        getUsers()
+        userApi.getUsers()
           .then((data) => setUsers(data))
           .catch((err) => toast.error(getErrorMessage(err)))
           .finally(() => setLoading(false));
