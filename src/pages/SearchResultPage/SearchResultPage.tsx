@@ -3,8 +3,8 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { List, Spin, Typography, Empty, Button, message } from "antd";
 import { searchApi } from "../../api/search.api";
 import type { SearchResultDto } from "../../types/app.types";
-import FileIcon from "../../components/common/Icons/FileIcon";
-import FolderIcon from "../../components/common/Icons/FolderIcon";
+import FileIcon from "../../assets/Icons/FileIcon";
+import FolderIcon from "../../assets/Icons/FolderIcon";
 import { ErrorMessages } from "../../constants/messages";
 
 const { Title, Text } = Typography;

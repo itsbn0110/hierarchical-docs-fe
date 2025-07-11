@@ -8,13 +8,13 @@ import {
   Divider,
   Empty,
   Space,
-  Spin,
+  Skeleton,
   Tooltip,
   message,
 } from "antd";
 import { useDriveContext } from "../../hooks/useDriveContext";
-import FileIcon from "../common/Icons/FileIcon";
-import FolderIcon from "../common/Icons/FolderIcon";
+import FileIcon from "../../assets/Icons/FileIcon";
+import FolderIcon from "../../assets/Icons/FolderIcon";
 import { ClockCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import {
   permissionsApi,
@@ -23,10 +23,10 @@ import {
   type UserPermission,
   type ActivityLog,
 } from "../../api";
+import ManageAccessModal from "../modals/ManageAccessModal";
 import type { PermissionLevel } from "../../types/app.types";
 import type { Node as DriveNode } from "../../types/app.types";
-import ManageAccessModal from "./ManageAccessModal";
-
+import { getAvatarInitial } from "../../utils/getAvatarIntial";
 import { useAuth } from "../../hooks/useAuth";
 import { ErrorMessages } from "../../constants/messages";
 
@@ -53,8 +53,6 @@ const PanelStyles = `
     height: 100%;
   }
 `;
-
-const getAvatarInitial = (name: string) => (name ? name.charAt(0).toUpperCase() : "?");
 
 /**
  * Helper function để render mô tả hành động một cách thân thiện.
@@ -96,6 +94,20 @@ const renderActivityDescription = (item: ActivityLog) => {
       );
   }
 };
+
+const DetailsPanelSkeleton: React.FC = () => (
+  <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Divider style={{ margin: 0, flexShrink: 0 }} />
+    <div style={{ padding: "24px" }}>
+      <Skeleton.Input active style={{ width: 150, height: 24 }} />
+      <Skeleton.Input active size="small" style={{ width: 220, marginTop: 16 }} />
+      <Skeleton.Button active block style={{ marginTop: 16, marginBottom: 24 }} />
+      <Divider />
+      <Skeleton.Input active style={{ width: 100, height: 24, marginTop: 16 }} />
+      <Skeleton paragraph={{ rows: 4 }} style={{ marginTop: 16 }} />
+    </div>
+  </div>
+);
 
 const DetailsPanel: React.FC = () => {
   const { selectedNodeId } = useDriveContext();
@@ -172,11 +184,7 @@ const DetailsPanel: React.FC = () => {
     );
   }
   if (loading) {
-    return (
-      <div style={{ textAlign: "center", padding: 40 }}>
-        <Spin size="large" />
-      </div>
-    );
+    return <DetailsPanelSkeleton />;
   }
   if (!nodeDetails) {
     return (

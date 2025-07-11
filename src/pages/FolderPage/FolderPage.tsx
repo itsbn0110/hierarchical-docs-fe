@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Spin,
@@ -27,11 +27,13 @@ import {
   DeleteOutlined,
   ExclamationCircleFilled,
   MoreOutlined,
+  SwapOutlined, // 1. Import icon mới
 } from "@ant-design/icons";
-import FileIcon from "../../components/common/Icons/FileIcon";
-import FolderIcon from "../../components/common/Icons/FolderIcon";
+import FileIcon from "../../assets/Icons/FileIcon";
+import FolderIcon from "../../assets/Icons/FolderIcon";
 import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/useAuth";
+import MoveNodeModal from "../../components/modals/MoveNodeModal";
 
 const { Title } = Typography;
 const { confirm } = Modal;
@@ -40,24 +42,28 @@ const FolderPage: React.FC = () => {
   const { folderId } = useParams<{ folderId: string }>();
   const navigate = useNavigate();
   const { selectNodeId, selectedNodeId, showDetails, toggleDetails } = useDriveContext();
-  const { user } = useAuth(); // [MỚI] Lấy thông tin user hiện tại
+  const { user } = useAuth();
 
   const [nodes, setNodes] = useState<TreeNodeDto[]>([]);
   const [currentFolder, setCurrentFolder] = useState<DriveNode | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // State cho modal đổi tên
   const [isRenameModalVisible, setRenameModalVisible] = useState(false);
   const [itemName, setItemName] = useState("");
   const [processing, setProcessing] = useState(false);
 
-  // State để quản lý context menu động
+  // 3. State cho modal di chuyển
+  const [isMoveModalVisible, setMoveModalVisible] = useState(false);
+  const [nodeToMove, setNodeToMove] = useState<{ id: string; name: string } | null>(null);
+
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
     x: number;
     y: number;
     record?: TreeNodeDto;
   }>({ visible: false, x: 0, y: 0 });
+
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
 
   const refreshFolder = async () => {
     if (!folderId) return;
@@ -71,15 +77,12 @@ const FolderPage: React.FC = () => {
 
   const { showCreateModal, CreateNodeModal } = useCreateNode({ onNodeCreated: refreshFolder });
 
-  // Đóng context menu khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Nếu click vào một menu khác hoặc ra ngoài, đóng menu hiện tại
       if (!(event.target as HTMLElement).closest(".ant-dropdown")) {
         setContextMenu((prev) => ({ ...prev, visible: false }));
       }
     };
-    // Dùng mousedown để bắt sự kiện trước khi menu item được click
     window.addEventListener("mousedown", handleClickOutside);
     return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -107,10 +110,6 @@ const FolderPage: React.FC = () => {
           toast.error("Không thể tải nội dung thư mục.");
           navigate("/");
         }
-        console.log(error);
-        toast.error("Không thể tải nội dung thư mục hoặc bạn không có quyền truy cập.");
-        setCurrentFolder(null);
-        setNodes([]);
       } finally {
         setLoading(false);
       }
@@ -133,8 +132,6 @@ const FolderPage: React.FC = () => {
       toggleDetails();
     }
   };
-
-  // --- Logic cho các hành động từ Context Menu ---
 
   const handleShowRenameModal = (record: TreeNodeDto) => {
     setContextMenu({ visible: false, x: 0, y: 0 });
@@ -183,7 +180,13 @@ const FolderPage: React.FC = () => {
     });
   };
 
-  // --- Định nghĩa các Context Menu ---
+  // 4. Hàm để mở modal di chuyển
+  const handleShowMoveModal = (record: TreeNodeDto) => {
+    setContextMenu({ visible: false, x: 0, y: 0 });
+    setNodeToMove({ id: record.id, name: record.name });
+    setMoveModalVisible(true);
+  };
+
   const emptyAreaMenu = (
     <Menu style={{ minWidth: 180 }}>
       <Menu.Item
@@ -208,7 +211,7 @@ const FolderPage: React.FC = () => {
       </Menu.Item>
     </Menu>
   );
-  // [SỬA] Thêm logic kiểm tra quyền RootAdmin
+
   const itemMenu = (record: TreeNodeDto) => {
     const isRootAdmin = user?.role === "RootAdmin";
     const canEdit =
@@ -221,9 +224,18 @@ const FolderPage: React.FC = () => {
           key="rename"
           icon={<EditOutlined />}
           onClick={() => handleShowRenameModal(record)}
-          disabled={!canEdit} // Vô hiệu hóa nếu không có quyền
+          disabled={!canEdit}
         >
           Đổi tên
+        </Menu.Item>
+        {/* 5. Thêm item "Di chuyển đến..." */}
+        <Menu.Item
+          key="move"
+          icon={<SwapOutlined />}
+          onClick={() => handleShowMoveModal(record)}
+          disabled={!canDelete} // Chỉ Owner hoặc RootAdmin mới được di chuyển
+        >
+          Di chuyển đến...
         </Menu.Item>
         <Menu.Item key="share" icon={<ShareAltOutlined />}>
           Chia sẻ
@@ -234,7 +246,7 @@ const FolderPage: React.FC = () => {
           icon={<DeleteOutlined />}
           danger
           onClick={() => handleDelete(record)}
-          disabled={!canDelete} // Vô hiệu hóa nếu không có quyền
+          disabled={!canDelete}
         >
           Xóa
         </Menu.Item>
@@ -270,27 +282,24 @@ const FolderPage: React.FC = () => {
           type="text"
           icon={<MoreOutlined />}
           onClick={(e) => {
-            e.stopPropagation(); // Ngăn sự kiện click vào hàng
-            // [SỬA] Kích hoạt context menu chính tại vị trí của nút
+            e.stopPropagation();
             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
             setContextMenu({ visible: true, x: rect.left, y: rect.bottom, record });
           }}
-          onContextMenu={(e) => e.stopPropagation()} // Ngăn menu vùng trống hiện ra
+          onContextMenu={(e) => e.stopPropagation()}
         />
       ),
     },
   ];
 
+  const isRootAdmin = user?.role === "RootAdmin";
+  const canCreate =
+    isRootAdmin ||
+    currentFolder?.userPermission === "Owner" ||
+    currentFolder?.userPermission === "Editor";
+
   return (
-    <div
-      style={{ height: "100%", display: "flex", flexDirection: "column" }}
-      onContextMenu={(e) => {
-        if (!(e.target as HTMLElement).closest(".ant-table-row")) {
-          e.preventDefault();
-          setContextMenu({ visible: true, x: e.clientX, y: e.clientY, record: undefined });
-        }
-      }}
-    >
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ flexShrink: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Breadcrumb style={{ marginBottom: 16 }}>
@@ -313,10 +322,20 @@ const FolderPage: React.FC = () => {
         <Title level={2}>{currentFolder.name}</Title>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, background: "#fff", borderRadius: 8 }}>
+      <div
+        ref={tableWrapperRef}
+        style={{ flex: 1, minHeight: 0, background: "#fff", borderRadius: 8 }}
+        onContextMenu={(e) => {
+          if (canCreate && !(e.target as HTMLElement).closest(".ant-table-row")) {
+            e.preventDefault();
+            setContextMenu({ visible: true, x: e.clientX, y: e.clientY, record: undefined });
+          }
+        }}
+      >
         <Table
           columns={columns}
           dataSource={nodes}
+          pagination={{ pageSize: 5 }}
           rowKey="id"
           onRow={(record) => ({
             onClick: () => handleRowClick(record),
@@ -338,7 +357,9 @@ const FolderPage: React.FC = () => {
       </div>
 
       <Dropdown
-        overlay={contextMenu.record ? itemMenu(contextMenu.record) : emptyAreaMenu}
+        overlay={
+          contextMenu.record ? itemMenu(contextMenu.record) : canCreate ? emptyAreaMenu : <></>
+        }
         visible={contextMenu.visible}
       >
         <div
@@ -368,6 +389,17 @@ const FolderPage: React.FC = () => {
           onPressEnter={handleRename}
         />
       </Modal>
+
+      {/* 6. Render Modal di chuyển */}
+      <MoveNodeModal
+        visible={isMoveModalVisible}
+        onCancel={() => setMoveModalVisible(false)}
+        onMoveSuccess={() => {
+          refreshFolder();
+          // TODO: Cần một cơ chế để refresh lại cây thư mục ở Sider
+        }}
+        nodeToMove={nodeToMove}
+      />
     </div>
   );
 };

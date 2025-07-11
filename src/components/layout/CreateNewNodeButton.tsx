@@ -3,8 +3,8 @@ import { Button, Dropdown, Menu, Modal, Input, message, Space } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { nodeApi } from "../../api";
 import type { CreateNodeDto } from "../../types/node.types";
-import FolderIcon from "../common/Icons/FolderIcon";
-import FileIcon from "../common/Icons/FileIcon";
+import FolderIcon from "../../assets/Icons/FolderIcon";
+import FileIcon from "../../assets/Icons/FileIcon";
 import { ErrorMessages } from "../../constants/messages"; // Import ErrorMessages
 
 interface CreateNewButtonProps {
@@ -104,7 +104,7 @@ const CreateNewButton: React.FC<CreateNewButtonProps> = ({ onNodeCreated }) => {
       >
         <Input
           placeholder="Nhập tên"
-          style={{padding : 8}}
+          style={{ padding: 8 }}
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
           onPressEnter={handleCreate}

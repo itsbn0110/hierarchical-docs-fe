@@ -105,7 +105,6 @@ const FilePage: React.FC = () => {
           message.error(ErrorMessages.LOAD_FOLDER_FAILED);
           navigate("/");
         }
-        message.error(ErrorMessages.LOAD_FILE_FAILED);
         setFile(null);
       })
       .finally(() => {

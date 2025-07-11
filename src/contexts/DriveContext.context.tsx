@@ -6,6 +6,7 @@ interface DriveContextType {
   selectNodeId: (id: string | null) => void; // [SỬA] Hàm để chọn ID
   toggleDetails: () => void;
   showDetails: () => void;
+  hiddenDetails: () => void;
 }
 
 // Tạo Context

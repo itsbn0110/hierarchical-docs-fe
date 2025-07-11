@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useDebounce } from "../../hooks/useDebounce";
 import { searchApi } from "../../api/search.api";
 import type { SearchResultDto, AccessStatus } from "../../types/app.types";
-import FileIcon from "../common/Icons/FileIcon";
-import FolderIcon from "../common/Icons/FolderIcon";
+import FileIcon from "../../assets/Icons/FileIcon";
+import FolderIcon from "../../assets/Icons/FolderIcon";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
 
 const { Text } = Typography;

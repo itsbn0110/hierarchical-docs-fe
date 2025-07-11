@@ -16,14 +16,10 @@ export function getErrorMessage(error: unknown): string {
     error !== null &&
     "response" in error &&
     typeof (error as ErrorResponse).response?.data?.message === "string" &&
-    ErrorMessages[
-      (error as ErrorResponse).response!.data!
-        .message as keyof typeof ErrorMessages
-    ]
+    ErrorMessages[(error as ErrorResponse).response!.data!.message as keyof typeof ErrorMessages]
   ) {
     return ErrorMessages[
-      (error as ErrorResponse).response!.data!
-        .message as keyof typeof ErrorMessages
+      (error as ErrorResponse).response!.data!.message as keyof typeof ErrorMessages
     ];
   }
   // Nếu BE trả về error dạng { error: 'USERNAME_AREADY_EXISTS' }
@@ -32,21 +28,14 @@ export function getErrorMessage(error: unknown): string {
     error !== null &&
     "response" in error &&
     typeof (error as ErrorResponse).response?.data?.error === "string" &&
-    ErrorMessages[
-      (error as ErrorResponse).response!.data!
-        .error as keyof typeof ErrorMessages
-    ]
+    ErrorMessages[(error as ErrorResponse).response!.data!.error as keyof typeof ErrorMessages]
   ) {
     return ErrorMessages[
-      (error as ErrorResponse).response!.data!
-        .error as keyof typeof ErrorMessages
+      (error as ErrorResponse).response!.data!.error as keyof typeof ErrorMessages
     ];
   }
   // Nếu BE trả về error dạng string
-  if (
-    typeof error === "string" &&
-    ErrorMessages[error as keyof typeof ErrorMessages]
-  ) {
+  if (typeof error === "string" && ErrorMessages[error as keyof typeof ErrorMessages]) {
     return ErrorMessages[error as keyof typeof ErrorMessages];
   }
   // Nếu không map được thì trả về lỗi mặc định

@@ -18,6 +18,10 @@ export const DriveProvider = ({ children }: { children: ReactNode }) => {
     setDetailsVisible(true);
   }, []);
 
+  const hiddenDetails = useCallback(() => {
+    setDetailsVisible(false);
+  }, []);
+
   // [SỬA] Dùng useMemo để object `value` chỉ được tạo lại khi cần thiết
   const value = useMemo(
     () => ({
@@ -26,8 +30,9 @@ export const DriveProvider = ({ children }: { children: ReactNode }) => {
       selectNodeId,
       toggleDetails,
       showDetails,
+      hiddenDetails,
     }),
-    [selectedNodeId, detailsVisible, selectNodeId, toggleDetails, showDetails]
+    [selectedNodeId, detailsVisible, selectNodeId, toggleDetails, showDetails, hiddenDetails]
   );
 
   return <DriveContext.Provider value={value}>{children}</DriveContext.Provider>;

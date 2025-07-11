@@ -19,8 +19,8 @@ import { accessRequestApi } from "../../api/accessRequest.api";
 import type { TreeNodeDto } from "../../types/node.types";
 import classNames from "classnames";
 import CreateNewButton from "./CreateNewNodeButton";
-import FileIcon from "../common/Icons/FileIcon";
-import FolderIcon from "../common/Icons/FolderIcon";
+import FileIcon from "../../assets/Icons/FileIcon";
+import FolderIcon from "../../assets/Icons/FolderIcon";
 import { ErrorMessages } from "../../constants/messages";
 
 interface CustomDataNode extends DataNode {
@@ -100,9 +100,11 @@ const AppSider: React.FC = () => {
       const currentId = pathParts[pathParts.length - 1];
       setSelectedKey(currentId);
     } else {
-      const activeItem = [...mainMenuItems, ...adminMenuItems, { key: 'access-requests', path: '/access-requests' }].find(
-        (item) => item.path === location.pathname
-      );
+      const activeItem = [
+        ...mainMenuItems,
+        ...adminMenuItems,
+        { key: "access-requests", path: "/access-requests" },
+      ].find((item) => item.path === location.pathname);
       if (activeItem) {
         setSelectedKey(activeItem.key);
       }
@@ -305,7 +307,7 @@ const AppSider: React.FC = () => {
               )}
             </div>
           )}
-          
+
           {/* SỬA LỖI Ở ĐÂY: Loại bỏ điều kiện, luôn render item */}
           {renderStaticItem(accessRequestItem)}
           {mainMenuItems.map(renderStaticItem)}

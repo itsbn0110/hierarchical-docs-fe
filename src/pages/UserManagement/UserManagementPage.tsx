@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { SuccessMessages } from "../../constants/messages";
 import { getErrorMessage } from "../../constants/getErrorMessage";
+import { useDriveContext } from "../../hooks/useDriveContext";
 
 const { Option } = Select;
 
@@ -15,18 +16,21 @@ const UserManagementPage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [form] = Form.useForm();
+  const { hiddenDetails } = useDriveContext();
 
   useEffect(() => {
     setLoading(true);
-    userApi.getUsers()
+    hiddenDetails();
+    userApi
+      .getUsers()
       .then((data) => setUsers(data))
       .catch((err) => toast.error(getErrorMessage(err)))
       .finally(() => setLoading(false));
-  }, []);
+  }, [hiddenDetails]);
 
   const deleteUserHandler = async (id: string) => {
     try {
-      await  userApi.deleteUser(id);
+      await userApi.deleteUser(id);
       setUsers((prev) => prev.filter((user) => user._id !== id));
       toast.success(SuccessMessages.USER_UPDATED);
     } catch (error) {
@@ -82,7 +86,8 @@ const UserManagementPage: React.FC = () => {
       } else {
         await userApi.createUser(values);
         setLoading(true);
-        userApi.getUsers()
+        userApi
+          .getUsers()
           .then((data) => setUsers(data))
           .catch((err) => toast.error(getErrorMessage(err)))
           .finally(() => setLoading(false));
@@ -162,6 +167,7 @@ const UserManagementPage: React.FC = () => {
         rowKey="_id"
         columns={columns}
         dataSource={users}
+        pagination={{ pageSize: 8 }}
         bordered
         loading={loading}
         style={{ marginTop: 8 }}
@@ -189,24 +195,23 @@ const UserManagementPage: React.FC = () => {
           >
             <Input type="email" disabled={editUser ? true : false} />
           </Form.Item>
-          <Form.Item name="role" label="Role" rules={[{ required: true, message: "Chọn vai trò" }]}>
-            <Select>
-              <Option value="RootAdmin">RootAdmin</Option>
-              <Option value="User">User</Option>
-            </Select>
-          </Form.Item>
+
           <Form.Item name="isActive" label="Active">
             <Select>
               <Option value={true}>Hoạt động</Option>
               <Option value={false}>Vô hiệu hóa</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="mustChangePassword" label="Đổi mật khẩu lần đầu ?">
-            <Select>
-              <Option value={true}>Có</Option>
-              <Option value={false}>Không</Option>
-            </Select>
-          </Form.Item>
+          {editUser ? (
+            <Form.Item name="mustChangePassword" label="Đổi mật khẩu lần đầu ?">
+              <Select>
+                <Option value={true}>Có</Option>
+                <Option value={false}>Không</Option>
+              </Select>
+            </Form.Item>
+          ) : (
+            ""
+          )}
         </Form>
       </Modal>
     </div>

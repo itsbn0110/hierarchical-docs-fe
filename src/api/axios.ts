@@ -41,6 +41,7 @@ api.interceptors.response.use(
             .catch((err) => {
               message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
               localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
               window.location.href = "/login";
               return Promise.reject(err);
             })
@@ -50,6 +51,12 @@ api.interceptors.response.use(
         }
         return refreshTokenPromise.then((newToken) => {
           originalRequests.headers["Authorization"] = `Bearer ${newToken}`;
+          if (originalRequests.method === "get") {
+            originalRequests.params = {
+              ...originalRequests.params,
+              _cacheBust: new Date().getTime(), // Thêm timestamp để URL luôn mới
+            };
+          }
           return api(originalRequests);
         });
       }

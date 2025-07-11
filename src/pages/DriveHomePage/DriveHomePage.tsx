@@ -3,19 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { Spin, Table, Typography, message, Empty } from "antd";
 import { nodeApi } from "../../api";
 import type { TreeNodeDto } from "../../types/node.types";
-import FolderIcon from "../../components/common/Icons/FolderIcon";
+import FolderIcon from "../../assets/Icons/FolderIcon";
 import { ErrorMessages } from "../../constants/messages";
+import { useDriveContext } from "../../hooks/useDriveContext";
 
 const { Title } = Typography;
 
 const DriveHomePage: React.FC = () => {
   const [rootNodes, setRootNodes] = useState<TreeNodeDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const { hiddenDetails } = useDriveContext();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRootContent = async () => {
       setLoading(true);
+      hiddenDetails();
       try {
         // Lấy các node ở cấp gốc bằng cách truyền `null`
         const content = await nodeApi.getNodesByParentId(null);
@@ -30,7 +33,7 @@ const DriveHomePage: React.FC = () => {
     };
 
     fetchRootContent();
-  }, []);
+  }, [hiddenDetails]);
 
   const handleRowClick = (record: TreeNodeDto) => {
     if (record.type === "FOLDER") {
@@ -78,6 +81,7 @@ const DriveHomePage: React.FC = () => {
       <Table
         columns={columns}
         dataSource={rootNodes}
+        pagination={{ pageSize: 7 }}
         rowKey="id"
         onRow={(record) => ({
           onClick: () => handleRowClick(record),
