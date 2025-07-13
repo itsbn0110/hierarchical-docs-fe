@@ -1,31 +1,7 @@
 import api from "./axios";
-import type { PermissionLevel } from "../types/app.types";
 
-// Định nghĩa kiểu dữ liệu cho một quyền truy cập trả về từ API
-export interface UserPermission {
-  _id: string; // ID của bản ghi quyền (permission record)
-  user: {
-    _id: string;
-    username: string;
-    email: string;
-  };
-  permission: PermissionLevel;
-}
+import { type GrantPermissionPayload, type InviteEmailPayload, type RecentItem, type SharedNode, type UserPermission,  } from "../types/permission.types";
 
-// Định nghĩa kiểu dữ liệu cho việc gửi yêu cầu cấp quyền
-// Backend sẽ cần tìm user ID từ email nếu được cung cấp
-interface GrantPermissionPayload {
-  nodeId: string;
-  permission: PermissionLevel;
-  userId?: string; // Cấp quyền theo User ID (nếu đã biết)
-  email?: string; // Hoặc cấp quyền bằng cách mời qua email
-}
-
-interface InviteEmailPayload {
-  nodeId: string;
-  permission: PermissionLevel;
-  email: string; // Hoặc cấp quyền bằng cách mời qua email
-}
 
 /**
  * Lấy danh sách tất cả các quyền truy cập cho một node cụ thể.
@@ -62,9 +38,26 @@ const inviteByEmail = async (payload: InviteEmailPayload): Promise<UserPermissio
   return res.data;
 };
 
+
+const getSharedWithMe = async (): Promise<SharedNode[]> => {
+    const res = await api.get('/permissions/shared-with-me');
+    return res.data;
+}
+
+/**
+ * Lấy danh sách các mục đã truy cập gần đây.
+ */
+const getRecentItems = async (): Promise<RecentItem[]> => {
+    const res = await api.get('/permissions/recent');
+    return res.data;
+}
+
+
 export const permissionsApi = {
   getPermissionsForNode,
   inviteByEmail,
   grant,
   revoke,
+  getSharedWithMe,
+  getRecentItems
 };

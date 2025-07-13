@@ -70,7 +70,7 @@ api.interceptors.response.use(
           keyboard: false,
           maskClosable: false,
           onOk: () => {
-            window.location.href = "/change-password";
+            window.location.href = "/profile";
           },
         });
       } else if (status === 401) {

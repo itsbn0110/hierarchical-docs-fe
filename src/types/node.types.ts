@@ -31,3 +31,11 @@ export interface CreateNodeDto {
   parentId?: string | null; // ID thư mục cha, null nếu là node gốc
   content?: string; // Chỉ áp dụng khi type là FILE
 }
+
+
+export interface TrashedItem {
+    _id: string;
+    name: string;
+    type: 'FILE' | 'FOLDER';
+    deletedAt: string;
+}

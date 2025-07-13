@@ -11,6 +11,8 @@ export const ErrorMessages = {
   INVALID_PASSWORD: "Mật khẩu phải có ít nhất 8 ký tự",
   INVALID_EMAIL: "Email không đúng định dạng",
   INVALID_USERNAME: "Tên người dùng không hợp lệ",
+  CHANGE_PASSWORD_FAILED:"Thay đổi password không hợp lệ",
+  UPDATE_PROFILE_FAILED:"Thay đổi thông tin cá nhân không hợp lệ",
   USERNAME_REQUIRED: "Tên người dùng không được để trống",
   EMAIL_REQUIRED: "Email không được để trống",
   PASSWORD_REQUIRED: "Mật khẩu không được để trống",
@@ -67,6 +69,9 @@ export const ErrorMessages = {
   REVOKE_PERMISSION_FAILED: "Thu hồi quyền thất bại. Có thể bạn đang cố xóa Owner cuối cùng.",
   INVITE_FAILED: "Mời thất bại. Người dùng không tồn tại hoặc đã có quyền.",
   LOAD_DETAIL_FAILED: "Không thể tải chi tiết cho mục này.",
+  LOAD_SHARED_LIST_FAILED: "Không thể tải danh sách tài nguyên được chia sẻ với tôi.",
+  LOAD_RECENT_LIST_FAILED: "Không thể tải danh sách các mục đã truy cập gần đây.",
+  LOAD_TRASH_LIST_FAILED: "Không thể tải danh sách các mục đã xóa trong thùng rác.",
 } as const;
 
 export const SuccessMessages = {

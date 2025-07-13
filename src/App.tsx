@@ -1,14 +1,18 @@
 import { Routes, Route } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import UserManagementPage from "./pages/UserManagement/UserManagementPage";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import MainLayout from "./layouts/MainLayout";
 import DriveHomePage from "./pages/DriveHomePage/DriveHomePage";
 import FolderPage from "./pages/FolderPage/FolderPage";
 import FilePage from "./pages/FilePage/FilePage";
 import RequestAccessPage from "./pages/RequestAccessPage/RequestAccessPage";
 import AccessRequestsPage from "./pages/AccessRequestManagement/AccessRequestManagement";
+import SharedWithMePage from "./pages/SharedWithMePage/SharedWithMePage";
+import RecentPage from "./pages/RecentPage/RecentPage";
+import TrashPage from "./pages/TrashPage/TrashPage";
+import ProfilePage from "./pages/ProfilePage/ProfilePage";
 const NotFound = () => <div>Unauthorized</div>;
 
 function App() {
@@ -18,6 +22,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/unauthorized" element={<NotFound />} />
         <Route path="/request-access/:nodeType/:nodeId" element={<RequestAccessPage />} />
+        <Route path="/profile" element={<ProfilePage/>} />
+        
 
         <Route path="/" element={<MainLayout />}>
           {/* Trang chủ của Drive, hiển thị các thư mục gốc */}
@@ -33,6 +39,13 @@ function App() {
           <Route path="/users" element={<UserManagementPage />} />
 
           <Route path="/access-requests" element={<AccessRequestsPage />} />
+
+          <Route path="/shared" element={<SharedWithMePage />} />
+
+          <Route path="/recent" element={<RecentPage />} />
+
+          <Route path="/trash" element={<TrashPage />} />
+          
 
           {/* Các route khác như /shared, /recent... */}
         </Route>

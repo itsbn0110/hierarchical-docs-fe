@@ -7,7 +7,7 @@ import type {
   UpdateNodeNameDto,
 } from "../types/node.types";
 import type { Node as DriveNode } from "../types/app.types";
-
+import { type TrashedItem } from "../types/node.types";
 const getNodesByParentId = async (parentId: string | null): Promise<TreeNodeDto[]> => {
   const res = await api.get("/nodes", {
     params: parentId ? { parentId } : {},
@@ -40,10 +40,28 @@ const moveNode = async (id: string, data: MoveNodeDto) => {
   return res.data;
 };
 
-const deleteNode = async (id: string) => {
+
+const getTrashedNodes = async (): Promise<TrashedItem[]> => {
+    const res = await api.get('/nodes/trash');
+    return res.data;
+}
+
+const softDeleteNode = async (id: string) => {
   const res = await api.delete(`/nodes/${id}`);
   return res.data;
 };
+
+
+const deleteNodePermanently = async (id: string): Promise<void> => {
+    await api.delete(`/nodes/${id}/permanently`);
+}
+
+
+const restoreNode = async (id: string): Promise<void> => {
+    await api.post(`/nodes/${id}/restore`);
+}
+
+
 
 export const nodeApi = {
   getNodesByParentId,
@@ -52,5 +70,8 @@ export const nodeApi = {
   updateNodeName,
   updateNodeContent,
   moveNode,
-  deleteNode,
+  softDeleteNode,
+  deleteNodePermanently,
+  getTrashedNodes,
+  restoreNode
 };

@@ -27,7 +27,7 @@ import {
   DeleteOutlined,
   ExclamationCircleFilled,
   MoreOutlined,
-  SwapOutlined, // 1. Import icon mới
+  SwapOutlined,
 } from "@ant-design/icons";
 import FileIcon from "../../assets/Icons/FileIcon";
 import FolderIcon from "../../assets/Icons/FolderIcon";
@@ -52,7 +52,6 @@ const FolderPage: React.FC = () => {
   const [itemName, setItemName] = useState("");
   const [processing, setProcessing] = useState(false);
 
-  // 3. State cho modal di chuyển
   const [isMoveModalVisible, setMoveModalVisible] = useState(false);
   const [nodeToMove, setNodeToMove] = useState<{ id: string; name: string } | null>(null);
 
@@ -102,7 +101,7 @@ const FolderPage: React.FC = () => {
         setNodes(folderContent);
         selectNodeId(folderId);
         showDetails();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (error.response?.status === 403) {
           navigate(`/request-access/folder/${folderId}`);
@@ -158,20 +157,23 @@ const FolderPage: React.FC = () => {
     }
   };
 
+  /**
+   * SỬA ĐỔI: Hàm này giờ sẽ gọi API xóa mềm (soft delete)
+   */
   const handleDelete = (record: TreeNodeDto) => {
     setContextMenu({ visible: false, x: 0, y: 0 });
     confirm({
-      title: `Bạn có chắc chắn muốn xóa "${record.name}"?`,
+      title: `Chuyển "${record.name}" vào thùng rác?`,
       icon: <ExclamationCircleFilled />,
-      content:
-        "Hành động này không thể hoàn tác. Tất cả nội dung bên trong (nếu có) cũng sẽ bị xóa.",
-      okText: "Xóa",
+      content: "Bạn có thể khôi phục mục này từ thùng rác.",
+      okText: "Chuyển vào thùng rác",
       okType: "danger",
       cancelText: "Hủy",
       onOk: async () => {
         try {
-          await nodeApi.deleteNode(record.id);
-          toast.success("Xóa thành công!");
+          // Giả sử API của bạn có hàm softDeleteNode
+          await nodeApi.softDeleteNode(record.id); 
+          toast.success("Đã chuyển vào thùng rác!");
           await refreshFolder();
         } catch {
           toast.error("Xóa thất bại.");
@@ -180,7 +182,6 @@ const FolderPage: React.FC = () => {
     });
   };
 
-  // 4. Hàm để mở modal di chuyển
   const handleShowMoveModal = (record: TreeNodeDto) => {
     setContextMenu({ visible: false, x: 0, y: 0 });
     setNodeToMove({ id: record.id, name: record.name });
@@ -228,12 +229,11 @@ const FolderPage: React.FC = () => {
         >
           Đổi tên
         </Menu.Item>
-        {/* 5. Thêm item "Di chuyển đến..." */}
         <Menu.Item
           key="move"
           icon={<SwapOutlined />}
           onClick={() => handleShowMoveModal(record)}
-          disabled={!canDelete} // Chỉ Owner hoặc RootAdmin mới được di chuyển
+          disabled={!canDelete}
         >
           Di chuyển đến...
         </Menu.Item>
@@ -321,7 +321,6 @@ const FolderPage: React.FC = () => {
         </div>
         <Title level={2}>{currentFolder.name}</Title>
       </div>
-
       <div
         ref={tableWrapperRef}
         style={{ flex: 1, minHeight: 0, background: "#fff", borderRadius: 8 }}
@@ -355,7 +354,6 @@ const FolderPage: React.FC = () => {
           locale={{ emptyText: <Empty description="Thư mục này trống." /> }}
         />
       </div>
-
       <Dropdown
         overlay={
           contextMenu.record ? itemMenu(contextMenu.record) : canCreate ? emptyAreaMenu : <></>
@@ -372,9 +370,7 @@ const FolderPage: React.FC = () => {
           }}
         />
       </Dropdown>
-
       {CreateNodeModal}
-
       <Modal
         title="Đổi tên"
         visible={isRenameModalVisible}
@@ -389,14 +385,11 @@ const FolderPage: React.FC = () => {
           onPressEnter={handleRename}
         />
       </Modal>
-
-      {/* 6. Render Modal di chuyển */}
       <MoveNodeModal
         visible={isMoveModalVisible}
         onCancel={() => setMoveModalVisible(false)}
         onMoveSuccess={() => {
           refreshFolder();
-          // TODO: Cần một cơ chế để refresh lại cây thư mục ở Sider
         }}
         nodeToMove={nodeToMove}
       />
