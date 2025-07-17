@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button, Input, Typography, Card, Avatar, message, Divider, Radio, Space } from "antd";
 import { useAuth } from "../../hooks/useAuth";
 import { accessRequestApi } from "../../api/accessRequest.api";
-import { ErrorMessages } from "../../constants/messages";
+import { ErrorMessages, SuccessMessages } from "../../constants/messages";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -31,7 +31,7 @@ const RequestAccessPage: React.FC = () => {
         requestedPermission: "Editor", // Mặc định
         isRecursive: nodeType === "folder" ? isRecursive : false, // Chỉ gửi isRecursive nếu là folder
       });
-      message.success("Yêu cầu của bạn đã được gửi đi.");
+      message.success(SuccessMessages.SEND_REQUEST_SUCCESS);
       setRequestSent(true);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

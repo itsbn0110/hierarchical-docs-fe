@@ -6,6 +6,7 @@ export interface UserPermission {
     _id: string;
     username: string;
     email: string;
+    isActive: boolean;
   };
   permission: PermissionLevel;
 }
@@ -25,23 +26,47 @@ export interface InviteEmailPayload {
   email: string; // Hoặc cấp quyền bằng cách mời qua email
 }
 
-
 export interface SharedNode {
-    _id: string;
-    name: string;
-    type: NodeType;
-    yourPermission: PermissionLevel;
-    sharedBy: string;
-    sharedAt: string;
+  _id: string;
+  name: string;
+  type: NodeType;
+  yourPermission: PermissionLevel;
+  sharedBy: string;
+  sharedAt: string;
 }
 
 /**
  * DTO cho một mục đã truy cập gần đây.
  */
 export interface RecentItem {
+  _id: string;
+  name: string;
+  type: NodeType;
+  owner: string;
+  lastAccessedAt: string;
+}
+
+export interface PermissionDetails {
+  _id: string;
+  permission: PermissionLevel;
+  grantedAt: string;
+  user: {
+    _id: string;
+    username: string;
+  };
+  node: {
     _id: string;
     name: string;
     type: NodeType;
-    owner: string;
-    lastAccessedAt: string;
+  };
+  grantedBy: {
+    _id: string;
+    username: string;
+  };
+}
+
+export interface FindAllPermissionsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
 }

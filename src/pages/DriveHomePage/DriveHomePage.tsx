@@ -28,9 +28,9 @@ import {
 } from "@ant-design/icons";
 import FileIcon from "../../assets/Icons/FileIcon";
 import FolderIcon from "../../assets/Icons/FolderIcon";
-import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/useAuth";
 import MoveNodeModal from "../../components/modals/MoveNodeModal";
+import { ErrorMessages, SuccessMessages } from "../../constants/messages";
 
 const { Title } = Typography;
 const { confirm } = Modal;
@@ -58,7 +58,7 @@ const DriveHomePage: React.FC = () => {
       const content = await nodeApi.getNodesByParentId(null);
       setRootNodes(content);
     } catch (error) {
-      message.error("Không thể tải dữ liệu Drive.");
+      message.error(ErrorMessages.LOAD_DRIVE_FAILED);
       console.error(error);
     } finally {
       setLoading(false);
@@ -71,6 +71,7 @@ const DriveHomePage: React.FC = () => {
 
   const { showCreateModal, CreateNodeModal } = useCreateNode({ onNodeCreated: fetchRootContent });
 
+  // SỬA ĐỔI: Đổi tên hàm và chức năng thành single-click
   const handleRowDoubleClick = (record: TreeNodeDto) => {
     if (record.type === "FOLDER") {
       navigate(`/drive/${record.id}`);
@@ -88,17 +89,17 @@ const DriveHomePage: React.FC = () => {
 
   const handleRename = async () => {
     if (!itemName.trim() || !actionTarget) {
-      toast.error("Tên không hợp lệ.");
+      message.error(ErrorMessages.FILE_NAME_INVALID);
       return;
     }
     setProcessing(true);
     try {
       await nodeApi.updateNodeName(actionTarget.id, { name: itemName });
-      toast.success("Đổi tên thành công!");
+      message.success(SuccessMessages.DOCUMENT_UPDATED);
       setRenameModalVisible(false);
       await fetchRootContent();
     } catch {
-      toast.error("Đổi tên thất bại.");
+      message.error("Đổi tên thất bại.");
     } finally {
       setProcessing(false);
     }
@@ -115,10 +116,10 @@ const DriveHomePage: React.FC = () => {
       onOk: async () => {
         try {
           await nodeApi.softDeleteNode(record.id);
-          toast.success("Đã chuyển vào thùng rác!");
+          message.success(SuccessMessages.MOVED_TO_TRASH);
           fetchRootContent();
         } catch {
-          toast.error("Xóa thất bại.");
+          message.error(ErrorMessages.MOVED_TO_TRASH_FAILED);
         }
       },
     });
@@ -132,25 +133,36 @@ const DriveHomePage: React.FC = () => {
   // Menu cho từng mục trong bảng
   const itemMenu = (record: TreeNodeDto) => {
     const isRootAdmin = user?.role === "RootAdmin";
-    const canEdit = isRootAdmin || record.userPermission === "Editor" || record.userPermission === "Owner";
+    const canEdit =
+      isRootAdmin || record.userPermission === "Editor" || record.userPermission === "Owner";
     const canDelete = isRootAdmin || record.userPermission === "Owner";
 
     return (
-      <Menu onClick={({ key }) => {
-          if (key === 'rename') handleShowRenameModal(record);
-          if (key === 'move') handleShowMoveModal(record);
-          if (key === 'delete') handleDelete(record);
-      }}>
-        <Menu.Item key="rename" icon={<EditOutlined />} disabled={!canEdit}>Đổi tên</Menu.Item>
-        <Menu.Item key="move" icon={<SwapOutlined />} disabled={!canDelete}>Di chuyển đến...</Menu.Item>
-        <Menu.Item key="share" icon={<ShareAltOutlined />}>Chia sẻ</Menu.Item>
+      <Menu
+        onClick={({ key }) => {
+          if (key === "rename") handleShowRenameModal(record);
+          if (key === "move") handleShowMoveModal(record);
+          if (key === "delete") handleDelete(record);
+        }}
+      >
+        <Menu.Item key="rename" icon={<EditOutlined />} disabled={!canEdit}>
+          Đổi tên
+        </Menu.Item>
+        <Menu.Item key="move" icon={<SwapOutlined />} disabled={!canDelete}>
+          Di chuyển đến...
+        </Menu.Item>
+        <Menu.Item key="share" icon={<ShareAltOutlined />}>
+          Chia sẻ
+        </Menu.Item>
         <Menu.Divider />
-        <Menu.Item key="delete" icon={<DeleteOutlined />} danger disabled={!canDelete}>Xóa</Menu.Item>
+        <Menu.Item key="delete" icon={<DeleteOutlined />} danger disabled={!canDelete}>
+          Xóa
+        </Menu.Item>
       </Menu>
     );
   };
 
-  const columns: TableProps<TreeNodeDto>['columns'] = [
+  const columns: TableProps<TreeNodeDto>["columns"] = [
     {
       title: "Tên",
       dataIndex: "name",
@@ -170,7 +182,7 @@ const DriveHomePage: React.FC = () => {
       width: 60,
       align: "right",
       render: (_, record) => (
-        <Dropdown overlay={itemMenu(record)} trigger={['click']}>
+        <Dropdown overlay={itemMenu(record)} trigger={["click"]}>
           <Button type="text" icon={<MoreOutlined />} onClick={(e) => e.stopPropagation()} />
         </Dropdown>
       ),
@@ -179,12 +191,24 @@ const DriveHomePage: React.FC = () => {
 
   // Menu cho vùng trống của bảng
   const emptyAreaMenu = (
-    <Menu onClick={({ key }) => {
-        const type = key === 'new-folder' ? 'FOLDER' : 'FILE';
-        showCreateModal({ type, parentId: null }); // parentId luôn là null ở trang chủ
-    }}>
-      <Menu.Item key="new-folder"><Space><FolderIcon />Thư mục mới</Space></Menu.Item>
-      <Menu.Item key="new-file"><Space><FileIcon />Tài liệu mới</Space></Menu.Item>
+    <Menu
+      onClick={({ key }) => {
+        const type = key === "new-folder" ? "FOLDER" : "FILE";
+        showCreateModal({ type, parentId: null });
+      }}
+    >
+      <Menu.Item key="new-folder">
+        <Space>
+          <FolderIcon />
+          Thư mục mới
+        </Space>
+      </Menu.Item>
+      <Menu.Item key="new-file">
+        <Space>
+          <FileIcon />
+          Tài liệu mới
+        </Space>
+      </Menu.Item>
     </Menu>
   );
 
@@ -195,34 +219,47 @@ const DriveHomePage: React.FC = () => {
   return (
     <div>
       <Title level={2}>Drive của tôi</Title>
-      <Dropdown overlay={emptyAreaMenu} trigger={['contextMenu']}>
+      <Dropdown overlay={emptyAreaMenu} trigger={["contextMenu"]}>
         <div style={{ background: "#fff", borderRadius: 8 }}>
-            <Table
-                columns={columns}
-                dataSource={rootNodes}
-                pagination={{ pageSize: 10 }}
-                rowKey="id"
-                onRow={(record) => ({
-                onDoubleClick: () => handleRowDoubleClick(record),
-                style: { cursor: 'pointer' },
-                })}
-                locale={{
-                emptyText: <Empty description="Drive của bạn chưa có gì. Hãy tạo mới!" />,
-                }}
-            />
+          <Table
+            columns={columns}
+            dataSource={rootNodes}
+            pagination={{ pageSize: 10 }}
+            rowKey="id"
+            onRow={(record) => ({
+              onDoubleClick: () => handleRowDoubleClick(record),
+              style: { cursor: "pointer" },
+            })}
+            locale={{
+              emptyText: <Empty description="Drive của bạn chưa có gì. Hãy tạo mới!" />,
+            }}
+          />
         </div>
       </Dropdown>
 
       {CreateNodeModal}
 
-      <Modal title="Đổi tên" open={isRenameModalVisible} onOk={handleRename} onCancel={() => setRenameModalVisible(false)} confirmLoading={processing}>
-        <Input placeholder="Nhập tên mới" value={itemName} onChange={(e) => setItemName(e.target.value)} onPressEnter={handleRename} />
+      <Modal
+        title="Đổi tên"
+        open={isRenameModalVisible}
+        onOk={handleRename}
+        onCancel={() => setRenameModalVisible(false)}
+        confirmLoading={processing}
+      >
+        <Input
+          placeholder="Nhập tên mới"
+          value={itemName}
+          onChange={(e) => setItemName(e.target.value)}
+          onPressEnter={handleRename}
+        />
       </Modal>
 
       <MoveNodeModal
         visible={isMoveModalVisible}
         onCancel={() => setMoveModalVisible(false)}
-        onMoveSuccess={() => { fetchRootContent(); }}
+        onMoveSuccess={() => {
+          fetchRootContent();
+        }}
         nodeToMove={actionTarget ? { id: actionTarget.id, name: actionTarget.name } : null}
       />
     </div>

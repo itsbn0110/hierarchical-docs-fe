@@ -13,6 +13,8 @@ import SharedWithMePage from "./pages/SharedWithMePage/SharedWithMePage";
 import RecentPage from "./pages/RecentPage/RecentPage";
 import TrashPage from "./pages/TrashPage/TrashPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
+import PermissionsManagementPage from "./pages/PermissionsManagementPage/PermissionsManagementPage";
+import SearchResultsPage from "./pages/SearchResultPage/SearchResultPage";
 const NotFound = () => <div>Unauthorized</div>;
 
 function App() {
@@ -22,8 +24,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/unauthorized" element={<NotFound />} />
         <Route path="/request-access/:nodeType/:nodeId" element={<RequestAccessPage />} />
-        <Route path="/profile" element={<ProfilePage/>} />
-        
+        <Route path="/profile" element={<ProfilePage />} />
 
         <Route path="/" element={<MainLayout />}>
           {/* Trang chủ của Drive, hiển thị các thư mục gốc */}
@@ -45,7 +46,10 @@ function App() {
           <Route path="/recent" element={<RecentPage />} />
 
           <Route path="/trash" element={<TrashPage />} />
-          
+
+          <Route path="/permissions-management" element={<PermissionsManagementPage />} />
+
+          <Route path="/search" element={<SearchResultsPage />} />
 
           {/* Các route khác như /shared, /recent... */}
         </Route>

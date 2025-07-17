@@ -40,28 +40,28 @@ const moveNode = async (id: string, data: MoveNodeDto) => {
   return res.data;
 };
 
-
 const getTrashedNodes = async (): Promise<TrashedItem[]> => {
-    const res = await api.get('/nodes/trash');
-    return res.data;
-}
+  const res = await api.get("/nodes/trash");
+  return res.data;
+};
+
+const getAllTrashedNodesForAdmin = async (): Promise<TrashedItem[]> => {
+  const res = await api.get("/nodes/admin/trash"); // <-- Gọi đến route mới của admin
+  return res.data;
+};
 
 const softDeleteNode = async (id: string) => {
   const res = await api.delete(`/nodes/${id}`);
   return res.data;
 };
 
-
 const deleteNodePermanently = async (id: string): Promise<void> => {
-    await api.delete(`/nodes/${id}/permanently`);
-}
-
+  await api.delete(`/nodes/${id}/permanently`);
+};
 
 const restoreNode = async (id: string): Promise<void> => {
-    await api.post(`/nodes/${id}/restore`);
-}
-
-
+  await api.post(`/nodes/${id}/restore`);
+};
 
 export const nodeApi = {
   getNodesByParentId,
@@ -73,5 +73,6 @@ export const nodeApi = {
   softDeleteNode,
   deleteNodePermanently,
   getTrashedNodes,
-  restoreNode
+  getAllTrashedNodesForAdmin,
+  restoreNode,
 };

@@ -4,13 +4,13 @@ import type { DataNode, TreeProps } from "antd/es/tree";
 import {
   FolderOpenOutlined,
   TeamOutlined,
-  SettingOutlined,
   UsergroupAddOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
   CaretDownOutlined,
   CaretRightOutlined,
   MailOutlined,
+  SafetyCertificateOutlined, // 1. Import icon mới
 } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -28,27 +28,32 @@ interface CustomDataNode extends DataNode {
 }
 
 const SiderTreeStyles = `
+  /* Sửa lại class của Ant Design để icon và title luôn thẳng hàng */
   .sider-drive-tree .ant-tree-node-content-wrapper {
     display: inline-flex !important;
     align-items: center !important;
     width: 100%;
   }
+
+  /* Đảm bảo title không bị xuống dòng và có dấu ... khi dài */
   .sider-drive-tree .ant-tree-title {
     display: inline-block;
+    max-width: 160px; /* Điều chỉnh chiều rộng tối đa tại đây */
     max-width: 160px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
+    margin-left: 4px; /* Thêm khoảng cách nhỏ với icon */
     margin-left: 4px;
   }
   .sider-drive-tree .ant-tree-indent-unit {
-    width: 16px !important;
+    width: 16px !important; /* Giảm khoảng cách mỗi cấp, mặc định là 24px */
   }
   .sider-drive-tree .ant-tree-switcher {
-    width: 8px !important;
+    width: 16px !important; /* Giảm chiều rộng của khu vực chứa mũi tên */
   }
-`;
+    `;
 
 const mainMenuItems = [
   { key: "shared", label: "Được chia sẻ với tôi", icon: <UsergroupAddOutlined />, path: "/shared" },
@@ -56,9 +61,15 @@ const mainMenuItems = [
   { key: "trash", label: "Thùng rác", icon: <DeleteOutlined />, path: "/trash" },
 ];
 
+// 2. Sửa đổi menu cho Admin
 const adminMenuItems = [
   { key: "users", label: "Quản lý Người dùng", icon: <TeamOutlined />, path: "/users" },
-  { key: "system", label: "Quản lý Hệ thống", icon: <SettingOutlined />, path: "/system" },
+  {
+    key: "permissions",
+    label: "Quản lý Quyền",
+    icon: <SafetyCertificateOutlined />,
+    path: "/permissions-management",
+  },
 ];
 
 const transformToDataNode = (node: TreeNodeDto): CustomDataNode => ({
@@ -81,6 +92,7 @@ const AppSider: React.FC = () => {
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [pendingRequestCount, setPendingRequestCount] = useState(0);
 
+  // ... các useEffect và hàm xử lý khác giữ nguyên ...
   useEffect(() => {
     accessRequestApi
       .getPendingRequests()
@@ -169,7 +181,7 @@ const AppSider: React.FC = () => {
       .then((rootNodes: TreeNodeDto[]) => {
         setTreeData(rootNodes.map(transformToDataNode));
       })
-      .catch(() => console.log("Không thể tải dữ liệu Drive."))
+      .catch(() => console.log(ErrorMessages.LOAD_DRIVE_FAILED))
       .finally(() => setTreeLoading(false));
   }, []);
 
@@ -308,7 +320,6 @@ const AppSider: React.FC = () => {
             </div>
           )}
 
-          {/* SỬA LỖI Ở ĐÂY: Loại bỏ điều kiện, luôn render item */}
           {renderStaticItem(accessRequestItem)}
           {mainMenuItems.map(renderStaticItem)}
 

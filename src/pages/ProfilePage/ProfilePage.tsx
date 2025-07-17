@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Tabs,
   Form,
@@ -10,16 +10,22 @@ import {
   Spin,
   Alert,
   Space,
-} from 'antd';
-import { UserOutlined, LockOutlined, EditOutlined, SaveOutlined, RollbackOutlined } from '@ant-design/icons';
-import { useAuth } from '../../hooks/useAuth';
-import { userApi } from '../../api/user.api';
-import { ErrorMessages } from '../../constants/messages';
-import type { ChangePasswordDto } from '../../types/api.types';
+} from "antd";
+import {
+  UserOutlined,
+  LockOutlined,
+  EditOutlined,
+  SaveOutlined,
+  RollbackOutlined,
+} from "@ant-design/icons";
+import { useAuth } from "../../hooks/useAuth";
+import { userApi } from "../../api/user.api";
+import { ErrorMessages, SuccessMessages } from "../../constants/messages";
+import type { ChangePasswordDto } from "../../types/api.types";
 
 const { Title, Paragraph } = Typography;
 const { TabPane } = Tabs;
-import { Header } from 'antd/es/layout/layout';
+import { Header } from "antd/es/layout/layout";
 const ProfilePage: React.FC = () => {
   const { user, login, logout } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -27,7 +33,7 @@ const ProfilePage: React.FC = () => {
   const [profileForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
 
-  const defaultTab = user?.mustChangePassword ? '2' : '1';
+  const defaultTab = user?.mustChangePassword ? "2" : "1";
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   useEffect(() => {
@@ -49,13 +55,13 @@ const ProfilePage: React.FC = () => {
     try {
       const updatedUser = await userApi.updateUser(user._id, values);
       if (login) {
-        login({ 
-            user: { ...user, ...updatedUser }, 
-            accessToken, 
-            refreshToken 
+        login({
+          user: { ...user, ...updatedUser },
+          accessToken,
+          refreshToken,
         });
       }
-      message.success('Cập nhật thông tin thành công!');
+      message.success(SuccessMessages.USER_UPDATED);
       setIsEditing(false);
     } catch (error) {
       console.log(error);
@@ -73,8 +79,8 @@ const ProfilePage: React.FC = () => {
         oldPassword: values.oldPassword,
         newPassword: values.newPassword,
       };
-      await userApi.changePassword(payload); 
-      message.success('Đổi mật khẩu thành công! Bạn sẽ được đăng xuất sau giây lát.');
+      await userApi.changePassword(payload);
+      message.success("Đổi mật khẩu thành công! Bạn sẽ được đăng xuất sau giây lát.");
       if (logout) {
         setTimeout(() => logout(), 2000);
       }
@@ -93,11 +99,13 @@ const ProfilePage: React.FC = () => {
   return (
     // SỬA ĐỔI: Bọc toàn bộ trang trong một container
     <div>
-      <Header/>
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px' }}>
+      <Header />
+      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "24px" }}>
         <Title level={2}>Tài khoản của tôi</Title>
-        <Paragraph type="secondary">Quản lý thông tin cá nhân và bảo mật tài khoản của bạn.</Paragraph>
-  
+        <Paragraph type="secondary">
+          Quản lý thông tin cá nhân và bảo mật tài khoản của bạn.
+        </Paragraph>
+
         {user?.mustChangePassword && (
           <Alert
             message="Yêu cầu đổi mật khẩu"
@@ -107,9 +115,16 @@ const ProfilePage: React.FC = () => {
             style={{ marginBottom: 24 }}
           />
         )}
-  
+
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab={<span><UserOutlined /> Thông tin cá nhân</span>} key="1">
+          <TabPane
+            tab={
+              <span>
+                <UserOutlined /> Thông tin cá nhân
+              </span>
+            }
+            key="1"
+          >
             <Spin spinning={loading}>
               <Form form={profileForm} layout="vertical" onFinish={handleUpdateProfile}>
                 <Descriptions bordered column={1} title="Thông tin cơ bản">
@@ -117,7 +132,7 @@ const ProfilePage: React.FC = () => {
                     {isEditing ? (
                       <Form.Item
                         name="username"
-                        rules={[{ required: true, message: 'Vui lòng nhập tên người dùng!' }]}
+                        rules={[{ required: true, message: "Vui lòng nhập tên người dùng!" }]}
                         style={{ margin: 0 }}
                       >
                         <Input />
@@ -132,17 +147,36 @@ const ProfilePage: React.FC = () => {
                 <Space style={{ marginTop: 24 }}>
                   {isEditing ? (
                     <>
-                      <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>Lưu thay đổi</Button>
-                      <Button onClick={() => { setIsEditing(false); profileForm.resetFields(); }} icon={<RollbackOutlined />}>Hủy</Button>
+                      <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
+                        Lưu thay đổi
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setIsEditing(false);
+                          profileForm.resetFields();
+                        }}
+                        icon={<RollbackOutlined />}
+                      >
+                        Hủy
+                      </Button>
                     </>
                   ) : (
-                    <Button onClick={() => setIsEditing(true)} icon={<EditOutlined />}>Chỉnh sửa</Button>
+                    <Button onClick={() => setIsEditing(true)} icon={<EditOutlined />}>
+                      Chỉnh sửa
+                    </Button>
                   )}
                 </Space>
               </Form>
             </Spin>
           </TabPane>
-          <TabPane tab={<span><LockOutlined /> Đổi mật khẩu</span>} key="2">
+          <TabPane
+            tab={
+              <span>
+                <LockOutlined /> Đổi mật khẩu
+              </span>
+            }
+            key="2"
+          >
             <Spin spinning={loading}>
               <Form
                 form={passwordForm}
@@ -153,14 +187,14 @@ const ProfilePage: React.FC = () => {
                 <Form.Item
                   name="oldPassword"
                   label="Mật khẩu cũ"
-                  rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ!' }]}
+                  rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ!" }]}
                 >
                   <Input.Password />
                 </Form.Item>
                 <Form.Item
                   name="newPassword"
                   label="Mật khẩu mới"
-                  rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới!' }]}
+                  rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }]}
                   hasFeedback
                 >
                   <Input.Password />
@@ -168,16 +202,16 @@ const ProfilePage: React.FC = () => {
                 <Form.Item
                   name="confirmPassword"
                   label="Xác nhận mật khẩu mới"
-                  dependencies={['newPassword']}
+                  dependencies={["newPassword"]}
                   hasFeedback
                   rules={[
-                    { required: true, message: 'Vui lòng xác nhận mật khẩu mới!' },
+                    { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
                     ({ getFieldValue }) => ({
                       validator(_, value) {
-                        if (!value || getFieldValue('newPassword') === value) {
+                        if (!value || getFieldValue("newPassword") === value) {
                           return Promise.resolve();
                         }
-                        return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                        return Promise.reject(new Error("Mật khẩu xác nhận không khớp!"));
                       },
                     }),
                   ]}
@@ -185,7 +219,9 @@ const ProfilePage: React.FC = () => {
                   <Input.Password />
                 </Form.Item>
                 <Form.Item>
-                  <Button type="primary" htmlType="submit">Đổi mật khẩu</Button>
+                  <Button type="primary" htmlType="submit">
+                    Đổi mật khẩu
+                  </Button>
                 </Form.Item>
               </Form>
             </Spin>

@@ -3,7 +3,7 @@ import { Tabs, Typography, message } from "antd";
 import { ClockCircleOutlined, HistoryOutlined } from "@ant-design/icons";
 import { accessRequestApi } from "../../api/accessRequest.api";
 import type { PendingRequest, ProcessedRequest } from "../../api/accessRequest.api";
-import { ErrorMessages } from "../../constants/messages";
+import { ErrorMessages, SuccessMessages } from "../../constants/messages";
 import RequestsTable from "../../components/layout/RequestTable"; // Giả sử bạn đặt file trên vào components
 import { useDriveContext } from "../../hooks/useDriveContext";
 const { Title, Paragraph } = Typography;
@@ -46,7 +46,7 @@ const AccessRequestsPage: React.FC = () => {
   const handleApprove = async (requestId: string) => {
     try {
       await accessRequestApi.approve(requestId);
-      message.success("Đã chấp thuận yêu cầu.");
+      message.success(SuccessMessages.APPROVE_REQUEST_SUCCESS);
       // Tải lại danh sách pending sau khi xử lý
       fetchRequests("pending");
     } catch (error) {
@@ -58,7 +58,7 @@ const AccessRequestsPage: React.FC = () => {
   const handleDeny = async (requestId: string) => {
     try {
       await accessRequestApi.deny(requestId);
-      message.info("Đã từ chối yêu cầu.");
+      message.success(SuccessMessages.DENY_REQUEST_SUCCESS);
       // Tải lại danh sách pending sau khi xử lý
       fetchRequests("pending");
     } catch (error) {

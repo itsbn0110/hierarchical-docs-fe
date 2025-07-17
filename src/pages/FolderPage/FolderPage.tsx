@@ -12,6 +12,7 @@ import {
   Input,
   Button,
   Space,
+  message,
 } from "antd";
 import type { TableProps } from "antd";
 import { nodeApi } from "../../api";
@@ -31,9 +32,12 @@ import {
 } from "@ant-design/icons";
 import FileIcon from "../../assets/Icons/FileIcon";
 import FolderIcon from "../../assets/Icons/FolderIcon";
-import { toast } from "react-toastify";
+
 import { useAuth } from "../../hooks/useAuth";
 import MoveNodeModal from "../../components/modals/MoveNodeModal";
+// Đường dẫn tới component ManageAccessModal mới của bạn
+import ManageAccessModal from "../../components/modals/ManageAccessModal";
+import { ErrorMessages, SuccessMessages } from "../../constants/messages";
 
 const { Title } = Typography;
 const { confirm } = Modal;
@@ -55,6 +59,9 @@ const FolderPage: React.FC = () => {
   const [isMoveModalVisible, setMoveModalVisible] = useState(false);
   const [nodeToMove, setNodeToMove] = useState<{ id: string; name: string } | null>(null);
 
+  const [isManageAccessModalVisible, setManageAccessModalVisible] = useState(false);
+  const [nodeToShare, setNodeToShare] = useState<DriveNode | null>(null);
+
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
     x: number;
@@ -70,7 +77,7 @@ const FolderPage: React.FC = () => {
       const folderContent = await nodeApi.getNodesByParentId(folderId);
       setNodes(folderContent);
     } catch {
-      toast.error("Không thể làm mới thư mục.");
+      message.error(ErrorMessages.REFRESH_DOCUMENT_FAILED);
     }
   };
 
@@ -101,12 +108,12 @@ const FolderPage: React.FC = () => {
         setNodes(folderContent);
         selectNodeId(folderId);
         showDetails();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (error.response?.status === 403) {
           navigate(`/request-access/folder/${folderId}`);
         } else {
-          toast.error("Không thể tải nội dung thư mục.");
+          message.error(ErrorMessages.LOAD_DRIVE_FAILED);
           navigate("/");
         }
       } finally {
@@ -141,25 +148,22 @@ const FolderPage: React.FC = () => {
 
   const handleRename = async () => {
     if (!itemName.trim() || !selectedNodeId) {
-      toast.error("Tên không hợp lệ.");
+      message.error(ErrorMessages.DOCUMENT_NAME_INVALID);
       return;
     }
     setProcessing(true);
     try {
       await nodeApi.updateNodeName(selectedNodeId, { name: itemName });
-      toast.success("Đổi tên thành công!");
+      message.success(SuccessMessages.DOCUMENT_RENAME_SUCCESS);
       setRenameModalVisible(false);
       await refreshFolder();
     } catch {
-      toast.error("Đổi tên thất bại.");
+      message.error(ErrorMessages.DOCUMENT_RENAME_FAILED);
     } finally {
       setProcessing(false);
     }
   };
 
-  /**
-   * SỬA ĐỔI: Hàm này giờ sẽ gọi API xóa mềm (soft delete)
-   */
   const handleDelete = (record: TreeNodeDto) => {
     setContextMenu({ visible: false, x: 0, y: 0 });
     confirm({
@@ -171,12 +175,11 @@ const FolderPage: React.FC = () => {
       cancelText: "Hủy",
       onOk: async () => {
         try {
-          // Giả sử API của bạn có hàm softDeleteNode
-          await nodeApi.softDeleteNode(record.id); 
-          toast.success("Đã chuyển vào thùng rác!");
+          await nodeApi.softDeleteNode(record.id);
+          message.success(SuccessMessages.MOVED_TO_TRASH);
           await refreshFolder();
         } catch {
-          toast.error("Xóa thất bại.");
+          message.error(ErrorMessages.DELETE_USER_FAILED);
         }
       },
     });
@@ -186,6 +189,23 @@ const FolderPage: React.FC = () => {
     setContextMenu({ visible: false, x: 0, y: 0 });
     setNodeToMove({ id: record.id, name: record.name });
     setMoveModalVisible(true);
+  };
+
+  const handleShowManageAccessModal = async (record: TreeNodeDto) => {
+    setContextMenu({ visible: false, x: 0, y: 0 });
+    try {
+      const fullNodeDetails = await nodeApi.getNodeById(record.id);
+      setNodeToShare(fullNodeDetails);
+      setManageAccessModalVisible(true);
+    } catch (error) {
+      console.log(error);
+      message.error(ErrorMessages.LOAD_DRIVE_FAILED);
+    }
+  };
+
+  const handleCloseManageAccessModal = () => {
+    setManageAccessModalVisible(false);
+    setNodeToShare(null);
   };
 
   const emptyAreaMenu = (
@@ -237,7 +257,12 @@ const FolderPage: React.FC = () => {
         >
           Di chuyển đến...
         </Menu.Item>
-        <Menu.Item key="share" icon={<ShareAltOutlined />}>
+        <Menu.Item
+          key="share"
+          icon={<ShareAltOutlined />}
+          onClick={() => handleShowManageAccessModal(record)}
+          disabled={!canEdit}
+        >
           Chia sẻ
         </Menu.Item>
         <Menu.Divider />
@@ -393,6 +418,17 @@ const FolderPage: React.FC = () => {
         }}
         nodeToMove={nodeToMove}
       />
+
+      {/* --- CẬP NHẬT CÁCH GỌI MODAL THEO ĐÚNG PROPS MỚI --- */}
+      {nodeToShare && (
+        <ManageAccessModal
+          node={nodeToShare}
+          isOpen={isManageAccessModalVisible}
+          onClose={handleCloseManageAccessModal}
+          onPermissionsUpdate={refreshFolder}
+          isCurrentUserRootAdmin={isRootAdmin}
+        />
+      )}
     </div>
   );
 };

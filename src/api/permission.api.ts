@@ -1,7 +1,14 @@
 import api from "./axios";
 
-import { type GrantPermissionPayload, type InviteEmailPayload, type RecentItem, type SharedNode, type UserPermission,  } from "../types/permission.types";
-
+import {
+  type FindAllPermissionsParams,
+  type GrantPermissionPayload,
+  type InviteEmailPayload,
+  type PermissionDetails,
+  type RecentItem,
+  type SharedNode,
+  type UserPermission,
+} from "../types/permission.types";
 
 /**
  * Lấy danh sách tất cả các quyền truy cập cho một node cụ thể.
@@ -38,20 +45,25 @@ const inviteByEmail = async (payload: InviteEmailPayload): Promise<UserPermissio
   return res.data;
 };
 
-
 const getSharedWithMe = async (): Promise<SharedNode[]> => {
-    const res = await api.get('/permissions/shared-with-me');
-    return res.data;
-}
+  const res = await api.get("/permissions/shared-with-me");
+  return res.data;
+};
 
 /**
  * Lấy danh sách các mục đã truy cập gần đây.
  */
 const getRecentItems = async (): Promise<RecentItem[]> => {
-    const res = await api.get('/permissions/recent');
-    return res.data;
-}
+  const res = await api.get("/permissions/recent");
+  return res.data;
+};
 
+const getAllPermissions = async (
+  params: FindAllPermissionsParams
+): Promise<{ data: PermissionDetails[]; total: number }> => {
+  const res = await api.get("/permissions/management", { params });
+  return res.data;
+};
 
 export const permissionsApi = {
   getPermissionsForNode,
@@ -59,5 +71,6 @@ export const permissionsApi = {
   grant,
   revoke,
   getSharedWithMe,
-  getRecentItems
+  getRecentItems,
+  getAllPermissions,
 };

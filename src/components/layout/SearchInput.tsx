@@ -7,6 +7,7 @@ import type { SearchResultDto, AccessStatus } from "../../types/app.types";
 import FileIcon from "../../assets/Icons/FileIcon";
 import FolderIcon from "../../assets/Icons/FolderIcon";
 import { SearchOutlined, CloseCircleFilled } from "@ant-design/icons";
+import { useDriveContext } from "../../hooks/useDriveContext";
 
 const { Text } = Typography;
 
@@ -31,7 +32,7 @@ const SearchInput: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-
+  const { hiddenDetails } = useDriveContext();
   // [MỚI] State để quản lý mục đang được chọn bằng bàn phím
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -51,6 +52,10 @@ const SearchInput: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    hiddenDetails();
+  }, [hiddenDetails]);
 
   // Hook để fetch gợi ý
   useEffect(() => {
@@ -121,6 +126,7 @@ const SearchInput: React.FC = () => {
           handleSelect(options[activeIndex]);
         } else if (searchTerm) {
           navigate(`/search?q=${searchTerm}`);
+          setDropdownVisible(false);
         }
         break;
       case "Escape":
@@ -155,7 +161,12 @@ const SearchInput: React.FC = () => {
         <Input
           placeholder="Tìm trong tài liệu..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            if (!isDropdownVisible) {
+              setDropdownVisible(true);
+            }
+          }}
           onFocus={() => setDropdownVisible(true)}
           onKeyDown={handleKeyDown}
           style={{

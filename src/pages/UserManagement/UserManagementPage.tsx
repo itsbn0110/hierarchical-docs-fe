@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Space, Modal, Form, Input, Select, Tag } from "antd";
+import { Table, Button, Space, Modal, Form, Input, Select, Tag, message } from "antd";
 import { userApi } from "../../api";
 import type { User } from "../../types/app.types";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { SuccessMessages } from "../../constants/messages";
-import { getErrorMessage } from "../../constants/getErrorMessage";
+import { ErrorMessages, SuccessMessages } from "../../constants/messages";
+
 import { useDriveContext } from "../../hooks/useDriveContext";
 
 const { Option } = Select;
@@ -24,7 +23,7 @@ const UserManagementPage: React.FC = () => {
     userApi
       .getUsers()
       .then((data) => setUsers(data))
-      .catch((err) => toast.error(getErrorMessage(err)))
+      .catch(() => message.error(ErrorMessages.LOAD_USERS_FAILED))
       .finally(() => setLoading(false));
   }, [hiddenDetails]);
 
@@ -32,10 +31,10 @@ const UserManagementPage: React.FC = () => {
     try {
       await userApi.deleteUser(id);
       setUsers((prev) => prev.filter((user) => user._id !== id));
-      toast.success(SuccessMessages.USER_UPDATED);
+      message.success(SuccessMessages.USER_DELETED);
     } catch (error) {
       console.log(error);
-      toast.error(getErrorMessage(error));
+      message.error(ErrorMessages.DELETE_USER_FAILED);
     }
   };
 
@@ -55,7 +54,8 @@ const UserManagementPage: React.FC = () => {
         isActive: [true, "true", 1, "1"].includes(userDetail.isActive),
       });
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      console.log("check error: ", err);
+      // message.error(getErrorMessage(err));
     }
   };
 
@@ -82,21 +82,24 @@ const UserManagementPage: React.FC = () => {
         setUsers((prev) =>
           prev.map((u) => (u._id === editUser._id ? { ...u, ...updateValues } : u))
         );
-        toast.success(SuccessMessages.USER_UPDATED);
+        message.success(SuccessMessages.USER_UPDATED);
       } else {
         await userApi.createUser(values);
         setLoading(true);
         userApi
           .getUsers()
           .then((data) => setUsers(data))
-          .catch((err) => toast.error(getErrorMessage(err)))
+          .catch((err) => {
+            console.log(err);
+            message.error(ErrorMessages.CANNOT_CREATE_USER);
+          })
           .finally(() => setLoading(false));
-        toast.success(SuccessMessages.USER_CREATED);
+        message.success(SuccessMessages.USER_CREATED);
       }
       setModalOpen(false);
     } catch (err) {
       console.log(err);
-      toast.error(getErrorMessage(err));
+      message.error(ErrorMessages.EMAIL_ALREADY_EXISTS);
     }
   };
 

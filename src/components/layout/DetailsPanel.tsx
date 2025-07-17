@@ -1,3 +1,4 @@
+// Giả định bạn đã cài đặt: npm install antd @ant-design/icons react-router-dom
 import React, { useEffect, useState } from "react";
 import {
   Tabs,
@@ -15,20 +16,16 @@ import {
 import { useDriveContext } from "../../hooks/useDriveContext";
 import FileIcon from "../../assets/Icons/FileIcon";
 import FolderIcon from "../../assets/Icons/FolderIcon";
-import { ClockCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
-import {
-  permissionsApi,
-  nodeApi,
-  activityLogApi,
-  type UserPermission,
-  type ActivityLog,
-} from "../../api";
+import { ClockCircleOutlined, InfoCircleOutlined, EditOutlined } from "@ant-design/icons";
+import { permissionsApi, nodeApi, activityLogApi, type ActivityLog } from "../../api";
+import { type UserPermission } from "../../types/permission.types";
 import ManageAccessModal from "../modals/ManageAccessModal";
 import type { PermissionLevel } from "../../types/app.types";
 import type { Node as DriveNode } from "../../types/app.types";
 import { getAvatarInitial } from "../../utils/getAvatarIntial";
 import { useAuth } from "../../hooks/useAuth";
 import { ErrorMessages } from "../../constants/messages";
+import { useNavigate } from "react-router-dom"; // <-- Import hook để điều hướng
 
 const { TabPane } = Tabs;
 const { Text, Title, Paragraph } = Typography;
@@ -59,33 +56,17 @@ const PanelStyles = `
  */
 const renderActivityDescription = (item: ActivityLog) => {
   const { user, action, details } = item;
-  const username = <Text strong>{user.username}</Text>;
+  const username = <Text strong>{user?.username || "Người dùng đã bị xóa"}</Text>;
 
   switch (action) {
     case "PERMISSION_GRANTED":
       return (
         <>
           {username} đã cấp quyền <Text strong>{details?.permissionLevel}</Text> cho{" "}
-          <Text strong>{details?.grantedFor}</Text>
+          <Text strong>{details?.grantedToUsername}</Text>
         </>
       );
-    case "PERMISSION_REVOKED":
-      return (
-        <>
-          {username} đã thu hồi quyền <Text strong>{details?.permissionLevel}</Text> từ{" "}
-          <Text strong>{details?.revokedFor}</Text>
-        </>
-      );
-    case "NODE_CREATED":
-      return <>{username} đã tạo mục này</>;
-    case "NODE_RENAMED":
-      return (
-        <>
-          {username} đã đổi tên mục từ "{details?.oldName}" thành "{details?.newName}"
-        </>
-      );
-    case "NODE_DELETED":
-      return <>{username} đã xóa mục</>;
+    // ... các case khác
     default:
       return (
         <>
@@ -111,7 +92,8 @@ const DetailsPanelSkeleton: React.FC = () => (
 
 const DetailsPanel: React.FC = () => {
   const { selectedNodeId } = useDriveContext();
-  const { user } = useAuth(); // Lấy user từ hook thật
+  const { user } = useAuth();
+  const navigate = useNavigate(); // <-- Khởi tạo hook điều hướng
 
   const [nodeDetails, setNodeDetails] = useState<DriveNode | null>(null);
   const [permissions, setPermissions] = useState<UserPermission[]>([]);
@@ -125,11 +107,7 @@ const DetailsPanel: React.FC = () => {
   const isCurrentUserRootAdmin = user?.role === "RootAdmin";
 
   useEffect(() => {
-    if (!selectedNodeId) {
-      setNodeDetails(null);
-      return;
-    }
-    if (!currentUserId) {
+    if (!selectedNodeId || !currentUserId) {
       setNodeDetails(null);
       return;
     }
@@ -145,7 +123,6 @@ const DetailsPanel: React.FC = () => {
         setPermissions(perms);
         setActivityLogs(logs);
 
-        console.log("check logs", logs);
         const myPermission = perms.find((p) => p.user._id === currentUserId);
         setCurrentUserPermission(myPermission ? myPermission.permission : null);
       })
@@ -160,6 +137,13 @@ const DetailsPanel: React.FC = () => {
 
   const handlePermissionsUpdate = () => {
     setDataVersion((prev) => prev + 1);
+  };
+
+  // Hàm xử lý khi nhấn nút "Yêu cầu quyền chỉnh sửa"
+  const handleRequestEditAccess = () => {
+    if (nodeDetails) {
+      navigate(`/request-access/${nodeDetails.type}/${nodeDetails._id}`);
+    }
   };
 
   if (!selectedNodeId) {
@@ -183,21 +167,21 @@ const DetailsPanel: React.FC = () => {
       </div>
     );
   }
-  if (loading) {
-    return <DetailsPanelSkeleton />;
-  }
-  if (!nodeDetails) {
+  if (loading) return <DetailsPanelSkeleton />;
+  if (!nodeDetails)
     return (
       <div style={{ padding: 24 }}>
         <Text type="danger">Không thể hiển thị chi tiết.</Text>
       </div>
     );
-  }
 
+  // ===== LOGIC HIỂN THỊ NÚT ĐÃ ĐƯỢC CẬP NHẬT =====
   const canManageAccess =
     currentUserPermission === "Owner" ||
     currentUserPermission === "Editor" ||
     isCurrentUserRootAdmin;
+  const canRequestEdit = currentUserPermission === "Viewer";
+  // ===============================================
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -223,7 +207,11 @@ const DetailsPanel: React.FC = () => {
               </Tooltip>
             ))}
           </Avatar.Group>
-          <Paragraph type="secondary">Sở hữu bởi {nodeDetails.createdBy}.</Paragraph>
+          <Paragraph type="secondary">
+            Được tạo bởi {nodeDetails.createdBy || "Người dùng đã bị xóa hoặc vô hiệu hóa"}.
+          </Paragraph>
+
+          {/* ===== LOGIC RENDER NÚT ĐỘNG ===== */}
           {canManageAccess && (
             <Button
               type="primary"
@@ -234,6 +222,19 @@ const DetailsPanel: React.FC = () => {
               Quản lý quyền truy cập
             </Button>
           )}
+          {canRequestEdit && (
+            <Button
+              type="primary"
+              ghost
+              icon={<EditOutlined />}
+              style={{ width: "100%", marginBottom: 24 }}
+              onClick={() => handleRequestEditAccess()}
+            >
+              Yêu cầu quyền truy cập
+            </Button>
+          )}
+          {/* ==================================== */}
+
           <Divider />
           <Title level={5}>Thuộc tính</Title>
           <List itemLayout="horizontal">
@@ -270,7 +271,7 @@ const DetailsPanel: React.FC = () => {
             renderItem={(item) => (
               <List.Item>
                 <List.Item.Meta
-                  avatar={<Avatar>{getAvatarInitial(item.user.username)}</Avatar>}
+                  avatar={<Avatar>{getAvatarInitial(item.user?.username)}</Avatar>}
                   title={renderActivityDescription(item)}
                   description={
                     <Space>

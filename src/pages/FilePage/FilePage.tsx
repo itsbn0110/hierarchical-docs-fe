@@ -102,7 +102,7 @@ const FilePage: React.FC = () => {
         if (error.response?.status === 403) {
           navigate(`/request-access/file/${fileId}`);
         } else {
-          message.error(ErrorMessages.LOAD_FOLDER_FAILED);
+          message.error(ErrorMessages.LOAD_FILE_FAILED);
           navigate("/");
         }
         setFile(null);

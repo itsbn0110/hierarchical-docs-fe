@@ -1,3 +1,5 @@
+// Giả định bạn đã cài đặt: npm install antd @ant-design/icons
+
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -11,10 +13,13 @@ import {
   Tooltip,
   Popconfirm,
   Spin,
+  Tag, // <-- Import component Tag của AntD
 } from "antd";
-import { UserAddOutlined, DeleteOutlined } from "@ant-design/icons";
+import { UserAddOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { type Node as DriveNode } from "../../types/app.types";
-import { permissionsApi, type UserPermission } from "../../api";
+import { permissionsApi } from "../../api";
+// Giả định UserPermission giờ đã bao gồm user.isActive
+import { type UserPermission } from "../../types/permission.types";
 import type { PermissionLevel } from "../../types/app.types";
 import { useAuth } from "../../hooks/useAuth";
 import { ErrorMessages } from "../../constants/messages";
@@ -56,7 +61,7 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [node._id]);
+  }, [node?._id]);
 
   useEffect(() => {
     if (isOpen) {
@@ -113,7 +118,7 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
   return (
     <Modal
-      title={`Chia sẻ "${node.name}"`}
+      title={`Chia sẻ "${node?.name}"`}
       open={isOpen}
       onCancel={handleModalClose}
       footer={[
@@ -124,6 +129,7 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
       width={600}
     >
       <Spin spinning={loading}>
+        {/* Phần invite không đổi */}
         <Input.Group compact style={{ display: "flex", marginBottom: 24 }}>
           <Input
             style={{ flex: 1, paddingLeft: 8 }}
@@ -149,9 +155,24 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
           header={<Text strong>Những người có quyền truy cập</Text>}
           dataSource={permissions}
           renderItem={(item) => {
+            // ===== LOGIC MỚI ĐƯỢC THÊM VÀO =====
             const isOwner = item.permission === "Owner";
             const isSelf = item.user._id === currentUser?._id;
-            const canRevoke = (!isOwner || (isOwner && isCurrentUserRootAdmin)) && !isSelf;
+            const isInactive = !item.user.isActive; // Kiểm tra trạng thái hoạt động
+
+            // Điều kiện để có thể thay đổi quyền
+            const canChangePermission =
+              !isSelf && !isInactive && (!isOwner || (isOwner && isCurrentUserRootAdmin));
+
+            // Điều kiện để có thể thu hồi quyền
+            const canRevoke =
+              !isSelf && !isInactive && (!isOwner || (isOwner && isCurrentUserRootAdmin));
+
+            let revokeTooltip = "";
+            if (isSelf) revokeTooltip = "Không thể tự thu hồi quyền";
+            else if (isInactive) revokeTooltip = "Tài khoản đã bị vô hiệu hóa";
+            else if (isOwner) revokeTooltip = "Không thể xóa chủ sở hữu";
+            // =======================================
 
             return (
               <List.Item
@@ -160,7 +181,7 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                     value={item.permission}
                     style={{ width: 150 }}
                     onChange={(value) => handleUpdatePermission(item.user._id, value)}
-                    disabled={isSelf || (isOwner && !isCurrentUserRootAdmin)}
+                    disabled={!canChangePermission} // <-- Cập nhật điều kiện disable
                   >
                     {isCurrentUserRootAdmin && (
                       <Select.Option value="Owner">Chủ sở hữu</Select.Option>
@@ -179,22 +200,33 @@ const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                       <Button type="text" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
                   ) : (
-                    <Tooltip
-                      title={isSelf ? "Không thể tự thu hồi quyền" : "Không thể xóa chủ sở hữu"}
-                    >
+                    <Tooltip title={revokeTooltip}>
                       <Button type="text" icon={<DeleteOutlined />} disabled />
                     </Tooltip>
                   ),
                 ]}
               >
                 <List.Item.Meta
-                  avatar={<Avatar>{getAvatarInitial(item.user.username)}</Avatar>}
-                  title={
-                    <>
-                      {item.user.username} {isSelf && <Text type="secondary">(bạn)</Text>}
-                    </>
+                  avatar={
+                    <Avatar style={{ opacity: isInactive ? 0.5 : 1 }}>
+                      {getAvatarInitial(item.user.username)}
+                    </Avatar>
                   }
-                  description={item.user.email}
+                  title={
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Text style={{ opacity: isInactive ? 0.5 : 1 }}>
+                        {item.user.username} {isSelf && <Text type="secondary">(bạn)</Text>}
+                      </Text>
+                      {isInactive && (
+                        <Tag icon={<ExclamationCircleOutlined />} color="warning">
+                          Vô hiệu hóa
+                        </Tag>
+                      )}
+                    </div>
+                  }
+                  description={
+                    <Text style={{ opacity: isInactive ? 0.5 : 1 }}>{item.user.email}</Text>
+                  }
                 />
               </List.Item>
             );

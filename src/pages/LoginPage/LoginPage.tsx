@@ -6,6 +6,7 @@ import { Input, Button, Tabs, Typography, Form } from "antd";
 import { authApi } from "../../api";
 import styles from "./LoginPage.module.scss";
 import classNames from "classnames/bind";
+import { ErrorMessages } from "../../constants/messages";
 
 const cx = classNames.bind(styles);
 const { Title, Text, Link } = Typography;
@@ -31,7 +32,7 @@ const LoginPage: React.FC = () => {
         navigate("/");
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Login failed");
+      setError(err?.response?.data?.message || ErrorMessages.LOGIN_FAILED);
     } finally {
       setLoading(false);
     }

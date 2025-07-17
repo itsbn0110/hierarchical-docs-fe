@@ -1,77 +1,98 @@
 export const ErrorMessages = {
+  // ===== AUTH & USER VALIDATION =====
+  LOGIN_FAILED: "Xảy ra lỗi khi đăng nhập",
   INVALID_CREDENTIALS: "Tên đăng nhập hoặc mật khẩu không đúng",
   USER_NOT_FOUND: "Không tìm thấy người dùng hoặc người dùng đã bị vô hiệu hóa",
   UNAUTHORIZED: "Không có quyền truy cập",
   TOKEN_EXPIRED: "Phiên đăng nhập đã hết hạn",
-  MUST_CHANGE_PASSWORD:
-    "Bạn phải đổi mật khẩu trước khi có thể thực hiện các hành động khác.",
+  MUST_CHANGE_PASSWORD: "Bạn phải đổi mật khẩu trước khi có thể thực hiện các hành động khác.",
   INVALID_OLD_PASSWORD: "Mật khẩu cũ không chính xác.",
-  USERNAME_AREADY_EXISTS: "Tên đăng nhập đã tồn tại",
-  EMAIL_ALREADY_EXISTS: "Email đã được sử dụng",
   INVALID_PASSWORD: "Mật khẩu phải có ít nhất 8 ký tự",
   INVALID_EMAIL: "Email không đúng định dạng",
   INVALID_USERNAME: "Tên người dùng không hợp lệ",
-  CHANGE_PASSWORD_FAILED:"Thay đổi password không hợp lệ",
-  UPDATE_PROFILE_FAILED:"Thay đổi thông tin cá nhân không hợp lệ",
   USERNAME_REQUIRED: "Tên người dùng không được để trống",
   EMAIL_REQUIRED: "Email không được để trống",
   PASSWORD_REQUIRED: "Mật khẩu không được để trống",
   ROLE_REQUIRED: "Vai trò không được để trống",
   INVALID_ROLE: "Vai trò không hợp lệ",
-  CANNOT_CREATE_USER: "Tạo User mới thất bại!",
   ACCOUNT_DISABLED: "Tài khoản của bạn đã bị vô hiệu hóa.",
+  USERNAME_AREADY_EXISTS: "Tên đăng nhập đã tồn tại",
+  EMAIL_ALREADY_EXISTS: "Email đã được sử dụng",
+  CHANGE_PASSWORD_FAILED: "Thay đổi password không hợp lệ",
+  UPDATE_PROFILE_FAILED: "Thay đổi thông tin cá nhân không hợp lệ",
+
+  // ===== USER MANAGEMENT =====
+  CANNOT_CREATE_USER: "Tạo User mới thất bại!",
   CANNOT_DELETE_SELF: "Bạn không thể tự xóa tài khoản của chính mình.",
+  LOAD_USERS_FAILED: "Không thể tải danh sách người dùng.",
+  DELETE_USER_FAILED: "Xóa người dùng thất bại.",
+  LOAD_USER_DETAIL_FAILED: "Không thể tải chi tiết người dùng.",
+  UPDATE_USER_FAILED: "Cập nhật thông tin người dùng thất bại.",
+
+  // ===== PERMISSIONS & ACCESS CONTROL =====
   INSUFFICIENT_PERMISSIONS: "Bạn không có đủ quyền để thực hiện hành động này",
   ACCESS_DENIED: "Từ chối truy cập vào tài nguyên này",
   ALREADY_HAS_PERMISSION: "Bạn đã có quyền truy cập vào mục này rồi.",
-  CANNOT_CHANGE_OWN_PERMISSION:
-    "Bạn không thể tự thay đổi quyền của chính mình.",
+  CANNOT_CHANGE_OWN_PERMISSION: "Bạn không thể tự thay đổi quyền của chính mình.",
   ONLY_OWNER_CAN_GRANT: "Chỉ chủ sở hữu mới có quyền cấp quyền cho mục này.",
-  CANNOT_CHANGE_OTHER_OWNER:
-    "Bạn không có quyền thay đổi quyền của một Owner khác.",
-  PERMISSION_NOT_FOUND: "Quyền này không tồn tại.",
-  ONLY_OWNER_CAN_REVOKE:
-    "Chỉ chủ sở hữu mới có quyền thu hồi quyền trên mục này.",
-  CANNOT_REVOKE_OTHER_OWNER:
-    "Bạn không có quyền thu hồi quyền của một Owner khác.",
+  CANNOT_CHANGE_OTHER_OWNER: "Bạn không có quyền thay đổi quyền của một Owner khác.",
+  PERMISSION_NOT_FOUND: "Tải quyền không thành công",
+  ONLY_OWNER_CAN_REVOKE: "Chỉ chủ sở hữu mới có quyền thu hồi quyền trên mục này.",
+  CANNOT_REVOKE_OTHER_OWNER: "Bạn không có quyền thu hồi quyền của một Owner khác.",
   CANNOT_DELETE_LAST_OWNER:
     "Không thể xóa chủ sở hữu cuối cùng của mục này. Hãy chuyển quyền sở hữu cho người khác trước.",
+  LOAD_PERMISSIONS_FAILED: "Không thể tải danh sách quyền.",
+  UPDATE_PERMISSION_FAILED: "Cập nhật quyền thất bại.",
+  REVOKE_PERMISSION_FAILED: "Thu hồi quyền thất bại. Có thể bạn đang cố xóa Owner cuối cùng.",
+  INVITE_FAILED: "Mời thất bại. Người dùng không tồn tại hoặc đã có quyền.",
+
+  // ===== FOLDER / DOCUMENT =====
   DOCUMENT_NOT_FOUND: "Không tìm thấy tài liệu",
   FOLDER_NOT_FOUND: "Không tìm thấy thư mục",
   INVALID_DOCUMENT_TYPE: "Loại tài liệu không hợp lệ",
-  REQUEST_LIMIT_EXCEEDED: "Quá nhiều yêu cầu, vui lòng thử lại sau",
-  INVALID_REQUEST: "Yêu cầu không hợp lệ",
-  PENDING_REQUEST_EXISTS:
-    "Bạn đã gửi một yêu cầu cho mục này và đang chờ xử lý.",
-  REQUEST_NOT_FOUND: "Yêu cầu không tồn tại.",
-  REQUEST_ALREADY_PROCESSED: "Yêu cầu này đã được xử lý.",
-  INTERNAL_SERVER_ERROR: "Đã xảy ra lỗi hệ thống",
-  BAD_REQUEST: "Yêu cầu không hợp lệ",
-  VALIDATION_ERROR: "Lỗi xác thực dữ liệu",
-  ROOTADMIN_ISNOT_DEFINED:
-    "ROOT_ADMIN_EMAIL, ROOT_ADMIN_USERNAME, hoặc ROOT_ADMIN_PASSWORD không được định nghĩa trong biến môi trường",
-  NODE_NAME_REQUIRED: "Tên không được để trống.",
   CREATE_NODE_FAILED: "Tạo mới thất bại. Bạn có thể không có quyền trong thư mục này.",
   LOAD_FOLDER_FAILED: "Không thể tải nội dung thư mục.",
   LOAD_FILE_FAILED: "Không thể tải nội dung file hoặc bạn không có quyền truy cập.",
   SAVE_FAILED: "Lưu thất bại.",
   SEARCH_FAILED: "Tìm kiếm thất bại.",
   RESOURCE_UNDEFINED: "Không thể xác định được tài nguyên cần yêu cầu.",
-  SEND_REQUEST_FAILED: "Gửi yêu cầu thất bại.",
   LOAD_DRIVE_FAILED: "Không thể tải dữ liệu từ Drive của bạn.",
-  LOAD_REQUEST_LIST_FAILED: "Không thể tải danh sách yêu cầu.",
-  APPROVE_REQUEST_FAILED: "Chấp thuận yêu cầu thất bại.",
-  DENY_REQUEST_FAILED: "Từ chối yêu cầu thất bại.",
-  LOAD_FOLDER_CONTENT_FAILED: "Không thể tải nội dung của thư mục.",
-  REFRESH_TREE_FAILED: "Không thể làm mới cây thư mục.",
-  LOAD_PERMISSIONS_FAILED: "Không thể tải danh sách quyền.",
-  UPDATE_PERMISSION_FAILED: "Cập nhật quyền thất bại.",
-  REVOKE_PERMISSION_FAILED: "Thu hồi quyền thất bại. Có thể bạn đang cố xóa Owner cuối cùng.",
-  INVITE_FAILED: "Mời thất bại. Người dùng không tồn tại hoặc đã có quyền.",
   LOAD_DETAIL_FAILED: "Không thể tải chi tiết cho mục này.",
   LOAD_SHARED_LIST_FAILED: "Không thể tải danh sách tài nguyên được chia sẻ với tôi.",
   LOAD_RECENT_LIST_FAILED: "Không thể tải danh sách các mục đã truy cập gần đây.",
   LOAD_TRASH_LIST_FAILED: "Không thể tải danh sách các mục đã xóa trong thùng rác.",
+  LOAD_FOLDER_CONTENT_FAILED: "Không thể tải nội dung của thư mục.",
+  REFRESH_TREE_FAILED: "Không thể làm mới cây thư mục.",
+  REFRESH_DOCUMENT_FAILED: "Không thể làm mới thư mục",
+  DOCUMENT_NAME_INVALID: "Tên thư mục không hợp lệ",
+  FILE_NAME_INVALID: "Tên thư mục không hợp lệ",
+  NODE_NAME_REQUIRED: "Tên không được để trống.",
+
+  // ===== REQUEST HANDLING =====
+  SEND_REQUEST_FAILED: "Gửi yêu cầu thất bại.",
+  LOAD_REQUEST_LIST_FAILED: "Không thể tải danh sách yêu cầu.",
+  APPROVE_REQUEST_FAILED: "Chấp thuận yêu cầu thất bại.",
+  DENY_REQUEST_FAILED: "Từ chối yêu cầu thất bại.",
+  REQUEST_LIMIT_EXCEEDED: "Quá nhiều yêu cầu, vui lòng thử lại sau",
+  INVALID_REQUEST: "Yêu cầu không hợp lệ",
+  PENDING_REQUEST_EXISTS: "Bạn đã gửi một yêu cầu cho mục này và đang chờ xử lý.",
+  REQUEST_NOT_FOUND: "Yêu cầu không tồn tại.",
+  REQUEST_ALREADY_PROCESSED: "Yêu cầu này đã được xử lý.",
+
+  // ===== DOCUMENT RENAME / MOVE =====
+  DOCUMENT_RENAME_FAILED: "Đổi tên thư mục thất bại",
+  MOVED_DOCUMENT_FAILED:
+    "Di chuyển thất bại. Bạn có thể không có đủ quyền hoặc đang di chuyển vào thư mục con của nó.",
+
+  // ===== TRASH =====
+  MOVED_TO_TRASH_FAILED: "Di chuyển vào thùng rác thất bại",
+  RESTORE_FAILED: "Khôi phục tài liệu thất bại",
+  DOCUMENT_FOREVER_DELETED_FAILED: "Xóa vĩnh viễn tài liệu thất bại",
+
+  // ===== SYSTEM =====
+  INTERNAL_SERVER_ERROR: "Đã xảy ra lỗi hệ thống",
+  BAD_REQUEST: "Yêu cầu không hợp lệ",
+  VALIDATION_ERROR: "Lỗi xác thực dữ liệu",
 } as const;
 
 export const SuccessMessages = {
@@ -84,6 +105,13 @@ export const SuccessMessages = {
   DOCUMENT_CREATED: "Tạo tài liệu thành công",
   DOCUMENT_UPDATED: "Cập nhật tài liệu thành công",
   DOCUMENT_DELETED: "Xóa tài liệu thành công",
+  DOCUMENT_FOREVER_DELETED: "Tài liệu đã bị xóa vĩnh viễn, không thể khôi phục",
+  DOCUMENT_RENAME_SUCCESS: "Đổi tên thư mục thành công",
   PERMISSION_GRANTED: "Cấp quyền thành công",
   PERMISSION_REVOKED: "Thu hồi quyền thành công",
+  MOVED_TO_TRASH: "Di chuyển vào thùng rác thành công",
+  RESTORE_SUCCESS: "Khôi phục người dùng thành công",
+  SEND_REQUEST_SUCCESS: "Yêu cầu của bạn đã được gửi đi.",
+  APPROVE_REQUEST_SUCCESS: "Yêu cầu đã được chấp thuận",
+  DENY_REQUEST_SUCCESS: "Đã từ chối yêu cầu.",
 } as const;

@@ -3,6 +3,7 @@ import { Modal, Tree, Spin, message, Empty } from "antd";
 import type { DataNode, TreeProps } from "antd/es/tree";
 import { nodeApi } from "../../api";
 import FolderIcon from "../../assets/Icons/FolderIcon";
+import { ErrorMessages } from "../../constants/messages";
 
 interface MoveNodeModalProps {
   visible: boolean;
@@ -109,9 +110,7 @@ const MoveNodeModal: React.FC<MoveNodeModalProps> = ({
       onCancel(); // Đóng modal
     } catch (error) {
       console.log(error);
-      message.error(
-        "Di chuyển thất bại. Bạn có thể không có quyền hoặc đang di chuyển vào thư mục con của nó."
-      );
+      message.error(ErrorMessages.MOVED_DOCUMENT_FAILED);
     } finally {
       setProcessing(false);
     }
